@@ -42,16 +42,16 @@ function sim_plot(N, dim, α, χ_M_0, χ_f_d, σ_M_lim, s_Bias)
 
     ## Plotting
     legend_string = ["Missile" "Target"]
-        
-    f = fig_print([p_Ms[:,1] p_Ts[:,1]], [p_Ms[:,2] p_Ts[:,2]], "", legend_string, "x [m]", "y [m]"; ar_val = :equal, save_file = 0, N_markers = 10)
-    plot!(f, xlims=(0, 6E3), ylims=(-3E3, 3E3))
-    f = fig_print([], [], "filename"; fig_handle = f, ar_val = :equal) 	# To just save the result
-    display(f) 
+    
+    if dim == 2
+        f = fig_print([p_Ms[:,1] p_Ts[:,1]], [p_Ms[:,2] p_Ts[:,2]], "", legend_string, "x [m]", "y [m]"; ar_val = :equal, save_file = 0, N_markers = 10)
+        plot!(f, xlims=(0, 6E3), ylims=(-3E3, 3E3))
 
-    if dim == 3	
+    elseif dim == 3	
         f = plot([p_Ms[:,1] p_Ts[:,1]], [p_Ms[:,2] p_Ts[:,2]], [p_Ms[:,3] p_Ts[:,3]], label = legend_string)
-        f = fig_print([], [], "filename"; fig_handle = f, ar_val = :equal)
     end
+    
+    f = fig_print([], [], "filename"; fig_handle = f, ar_val = :equal) 	# To just save the result
 end
 
 # Parallel execution

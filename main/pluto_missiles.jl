@@ -34,7 +34,7 @@ include("sim_missiles.jl")
 
 # ╔═╡ b4aa1cc3-07de-4717-a39e-8a9c4b1c8512
 md"""
-# Missile Guidance Simulation
+# Missile Guidance Simulation with Reactive Interactivity
 2D/3D Biased Proportional Navigation Guidance Law is implemented.
 
 In 2D, lateral acceleration command is given as follows:
@@ -66,7 +66,7 @@ end
 # ╔═╡ bce435b0-c6d4-4ac7-93aa-727ed08c73e5
 # begin
 # 	# Initial Conditions / Design parameters
-#     dim     = 3
+#     dim     = 2
 #     N       = 3
 #     s_Bias  = ComponentArray(δ = 0.01, n = n, r_ref = 10E3, k = 9, m = 10)
     
@@ -102,11 +102,11 @@ end
 # 	# Plotting
 # 	legend_string = ["Missile" "Target"]
 	
-# 	f = fig_print([p_Ms[:,1] p_Ts[:,1]], [p_Ms[:,2] p_Ts[:,2]], "", legend_string, "x [m]", "y [m]"; ar_val = :equal, save_file = 0, N_markers = 10)
-# 	# plot!(f, xlims=(0, 6E3), ylims=(-3E3, 3E3))
-# 	f = fig_print([], [], "filename"; fig_handle = f) 	# To just save the result
-	
-# 	if dim == 3	
+# 	if dim == 2
+# 		f = fig_print([p_Ms[:,1] p_Ts[:,1]], [p_Ms[:,2] p_Ts[:,2]], "", legend_string, "x [m]", "y [m]"; ar_val = :equal, save_file = 0, N_markers = 10)
+# 		plot!(f, xlims=(0, 6E3), ylims=(-3E3, 3E3))
+# 		f = fig_print([], [], "filename"; fig_handle = f) 	# To just save the result
+# 	elseif dim == 3
 # 		f = plot([p_Ms[:,1] p_Ts[:,1]], [p_Ms[:,2] p_Ts[:,2]], [p_Ms[:,3] p_Ts[:,3]], label = legend_string)
 # 		f = fig_print([], [], "filename"; fig_handle = f, ar_val = :equal)
 # 	end
@@ -118,5 +118,5 @@ end
 # ╠═50becda1-a0e6-4e4c-98ca-a72992a5fc42
 # ╠═b9c304e7-9034-44d4-a4a6-a5d34d0baf58
 # ╟─9fcf0c9b-d559-402f-883c-c53f61815c94
-# ╠═b75636f4-b7f2-4356-9e2a-d90942c0071e
+# ╟─b75636f4-b7f2-4356-9e2a-d90942c0071e
 # ╟─bce435b0-c6d4-4ac7-93aa-727ed08c73e5
