@@ -40,7 +40,8 @@ function main(p_M_0::Vector, v_M_0::Vector, p_T_0::Vector, v_T_0::Vector, s_guid
                          savestep=Δt,  # savestep is NOT simulation step
                          solver=Tsit5(),
                          callback=cb,
-                         reltol=1e-6
+                         reltol=1e-8,
+                         abstol=1e-8
                         )  # sim is exported from FS
 
 	return df

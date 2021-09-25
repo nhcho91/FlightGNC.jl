@@ -6,7 +6,7 @@ include("../main/main_missiles.jl")
 include("../main/sim_missiles.jl")
 
 ##
-sim_plot(N, dim, α, χ_M_0, χ_f_d, σ_M_lim, s_Bias)
+# sim_plot(N, dim, α, χ_M_0, χ_f_d, σ_M_lim, s_Bias)
 
 # Parallel execution
 # Threads.nthreads()

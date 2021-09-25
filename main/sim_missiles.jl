@@ -1,57 +1,75 @@
-## Simulation Input: Initial Condition / Design parameters
 using Plots
-α       = 1
-dim     = 2
-N       = 3
-s_Bias  = ComponentArray(δ = 0.01, n = 1, r_ref = 10E3, k = 9, m = 10)
+
+# Simulation Input: Initial Condition / Design parameters
+dim     = 3
+
+p_M_0   = zeros(dim)
 
 V_M_0   = 300
-γ_M_0 	= deg2rad(45)
-χ_M_0_deg = 30
-χ_f_d_deg = 180
-σ_M_lim_deg = 60
-χ_M_0 	= deg2rad(χ_M_0_deg)
-χ_f_d 	= deg2rad(χ_f_d_deg)
-σ_M_lim = deg2rad(σ_M_lim_deg)
+γ_M_0 	= deg2rad(0)
+χ_M_0 	= deg2rad(60)
 
-function sim_plot(N, dim, α, χ_M_0, χ_f_d, σ_M_lim, s_Bias)
-    if dim == 2
-        (p_M_0, v_M_0)  = (zeros(dim), V_M_0*[sin(χ_M_0); cos(χ_M_0)])
-        (p_T_0, v_T_0)  = ([5E3; 1E3], zeros(dim))
-        γ_f_d = 0
-    elseif dim == 3
-        (p_M_0, v_M_0)  = (zeros(dim), V_M_0*[cos(γ_M_0)*sin(χ_M_0); cos(γ_M_0)*cos(χ_M_0); sin(γ_M_0)])
-        (p_T_0, v_T_0)  = ([10E3; 5E3; 5E3], 100*[-1; 0; 0])
-        γ_f_d = -0.01
-    end
-    v̂_f_d   = [cos(γ_f_d)*sin(χ_f_d); cos(γ_f_d)*cos(χ_f_d); sin(γ_f_d)]
+p_T_0   = [5E3; 0; 0]; #[10E3; 5E3; 5E3]
+v_T_0   = zeros(dim) # 100*[-1; 0; 0]
 
-    s_BPNG = BPNG(N, dim, α, σ_M_lim, v̂_f_d, Bias_zero, s_Bias) 
-    # Bias = Bias_zero, Bias_IACG_StationaryTarget, Bias_IACG_StationaryTarget_2D
+γ_f_d   = 0
+χ_f_d 	= deg2rad(180)
 
+if dim == 2
+    γ_M_0   = 0
+    γ_f_d   = 0
+end
+
+v_M_0   = V_M_0*[cos(γ_M_0)*sin(χ_M_0); cos(γ_M_0)*cos(χ_M_0); sin(γ_M_0)]
+v̂_f_d   = [cos(γ_f_d)*sin(χ_f_d); cos(γ_f_d)*cos(χ_f_d); sin(γ_f_d)]
+
+if dim == 2
+    (p_M_0, v_M_0, p_T_0, v_T_0) = (p_M_0, v_M_0, p_T_0, v_T_0) .|> x -> x[1:2]
+end
+
+
+
+σ_M_lim = deg2rad(90)
+A_M_max = 100
+
+N       = 3
+s_Bias  = ComponentArray(α = 1, δ = 0.01, n = 1, r_ref = 10E3, k = 9, m = 10)
+
+s_BPNG  = BPNG(N, dim, σ_M_lim, v̂_f_d, Bias_zero, s_Bias) 
+# Bias options: Bias_zero, Bias_IACG_StationaryTarget, Bias_IACG_StationaryTarget_2D
+
+function sim_plot(p_M_0::Vector, v_M_0::Vector, p_T_0::Vector, v_T_0::Vector, s_BPNG::BPNG, A_M_max::Number)
     # Execute simulation
-    df = main(p_M_0, v_M_0, p_T_0, v_T_0, s_BPNG; A_M_max = 100)
+    df = main(p_M_0, v_M_0, p_T_0, v_T_0, s_BPNG; A_M_max = A_M_max)
 
     ts = df.time
     p_Ms = df.sol |> Map(datum -> datum.pursuer.p) |> collect
     p_Ts = df.sol |> Map(datum -> datum.evador.p)  |> collect
 
     p_Ms = hcat(p_Ms...)'
-    p_Ts = hcat(p_Ts...)';
+    p_Ts = hcat(p_Ts...)'
 
 
-    ## Plotting
+    # Plotting
     legend_string = ["Missile" "Target"]
     
     if dim == 2
         f = fig_print([p_Ms[:,1] p_Ts[:,1]], [p_Ms[:,2] p_Ts[:,2]], "", legend_string, "x [m]", "y [m]"; ar_val = :equal, save_file = 0, N_markers = 10)
-        plot!(f, xlims=(0, 6E3), ylims=(-3E3, 3E3))
+        # plot!(f, xlims=(0, 6E3), ylims=(-3E3, 3E3))
+
+        # f2 = fig_print(ts, [p_Ms[:,1] p_Ts[:,2]], "", ["x" "y"], "t [s]", "pos [m]"; save_file = 0)
 
     elseif dim == 3	
-        f = plot([p_Ms[:,1] p_Ts[:,1]], [p_Ms[:,2] p_Ts[:,2]], [p_Ms[:,3] p_Ts[:,3]], label = legend_string)
+        # f = plot([p_Ms[:,1] p_Ts[:,1]], [p_Ms[:,2] p_Ts[:,2]], [p_Ms[:,3] p_Ts[:,3]], label = legend_string, 
+        #         xlabel = "x [m]", ylabel = "y [m]", zlabel = "z [m]", aspect_ratio = :equal,
+        #         camera = (0,90))
+        f = fig_print([p_Ms[:,1] p_Ts[:,1]], [p_Ms[:,2] p_Ts[:,2]], "", legend_string, "x [m]", "y [m]"; ar_val = :equal, save_file = 0, N_markers = 10)
     end
     
     f = fig_print([], [], "filename"; fig_handle = f, ar_val = :equal) 	# To just save the result
+    display(f)
+
+    return df
 end
 
 # Parallel execution

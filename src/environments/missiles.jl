@@ -23,7 +23,7 @@ function Dynamics!(env::PointMassMissile)
         @log v
         dx.p = v
         if norm(u) >= A_max
-            u = normalize(u) * min(max(norm(u), -A_max), A_max)
+            u = normalize(u) * clamp(norm(u), -A_max, A_max)
         end
         dx.v = u
     end

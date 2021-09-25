@@ -1,3 +1,5 @@
 *.command
 /Manifest.toml
 /main/Figures/*.*
+.DS_Store
+/.vscode

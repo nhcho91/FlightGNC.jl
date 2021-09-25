@@ -60,7 +60,7 @@ end
 # ╔═╡ b75636f4-b7f2-4356-9e2a-d90942c0071e
 begin
 	s_Bias  = ComponentArray(δ = 0.01, n = n, r_ref = 10E3, k = 9, m = 10)
-	sim_plot(3, 2, α, deg2rad(χ_M_0_deg), deg2rad(χ_f_d_deg), deg2rad(σ_M_lim), s_Bias)
+	# sim_plot(3, 2, α, deg2rad(χ_M_0_deg), deg2rad(χ_f_d_deg), deg2rad(σ_M_lim), s_Bias)
 end
 
 # ╔═╡ bce435b0-c6d4-4ac7-93aa-727ed08c73e5
