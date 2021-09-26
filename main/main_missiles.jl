@@ -31,7 +31,7 @@ function main(p_M_0::Vector, v_M_0::Vector, p_T_0::Vector, v_T_0::Vector, s_guid
         
     # Execute Simulation
     # prob: DE problem, df: DataFrame		
-    @time prob, df = FSimBase._sim(
+    @time prob, df = FSimBase.sim(
                          x0,  # initial condition
                          apply_inputs(Dynamics!(env);
                                       u_pursuer=BPNG_cmd(s_guidance),
