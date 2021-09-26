@@ -34,10 +34,6 @@ function BPNG_cmd(s_guidance::BPNG)
     end
 end
 
-function Bias_zero(s_guidance::BPNG, x, t)
-    return zeros(3)
-end
-
 function Bias_IACG_StationaryTarget(s_guidance::BPNG, x, t)
     @unpack N, dim, σ_M_lim, v̂_f_d, s_Bias = s_guidance
     @unpack α, δ, n, r_ref, k, m = s_Bias
@@ -61,14 +57,14 @@ function Bias_IACG_StationaryTarget(s_guidance::BPNG, x, t)
     # σ_M      = acos( clamp( dot(r̂, v̂_M), -1, 1 ) )
     # atan-based implementation is more robustly accurate than using acos for computation
 
-    k̂        = cross(r̂, v̂_M)
-    # alternative: k̂ = normalize(cross(p_T - p_M, v_M))
+    k̂ = normalize(cross(p_T - p_M, v_M))
     v̂_f_pred = v̂_M * cos(N / (N - 1) * σ_M) - cross(k̂, v̂_M) * sin(N / (N - 1) * σ_M)
     # alternative: v̂_f_pred =   r̂ * cos(1 / (N - 1) * σ_M) -   cross(k̂, r̂) * sin(1 / (N - 1) * σ_M)
     e_v̂_f    = atan(norm(cross(v̂_f_pred, v̂_f_d)), dot(v̂_f_pred, v̂_f_d))
     ω_f      = -K_e(r, N, δ, n, r_ref) * ṙ * e_v̂_f^α * normalize(cross(v̂_f_pred, v̂_f_d)) + K_roll(r) * v̂_f_d
-    ω_bias   = K_σ(σ_M, σ_M_lim, k, m) * ( -(N - 1) * dot(ω_f, k̂) * k̂ + sin(σ_M) * dot(ω_f, r̂ + cot(1 / (N-1) * σ_M) * cross(k̂, r̂)) * cross(v̂_M, k̂) )
+    ω_bias   = K_σ(σ_M, σ_M_lim, k, m) * ( -(N - 1) * dot(ω_f, k̂) * k̂  + sin(σ_M) * dot(ω_f, r̂ + cot(1 / (N-1) * σ_M) * cross(k̂, r̂)) * cross(v̂_M, k̂) )
 
+    """
     if dim == 2  # identical to the codes above, thus can be deleted
         ê_z = [0; 0; 1]
         if cross(p_T - p_M, v_M)[3] >= 0
@@ -82,7 +78,8 @@ function Bias_IACG_StationaryTarget(s_guidance::BPNG, x, t)
         ω_f     = K_e(r, N, δ, n, r_ref) * ṙ  * sign(e_v̂_f_signed) * abs(e_v̂_f_signed)^α * ê_z
         ω_bias  = K_σ(σ_M, σ_M_lim, k, m) * ( -(N - 1) * ω_f )
     end
-
+    """
+    
     a_M_bias = cross(ω_bias, v_M)
 
     return a_M_bias
@@ -130,4 +127,8 @@ function Bias_IACG_StationaryTarget_2D(s_guidance::BPNG, x, t)
     a_M_bias = A_M_bias * [-sin(γ_M); cos(γ_M); 0]
 
     return a_M_bias
+end
+
+function Bias_zero(s_guidance::BPNG, x, t)
+    return zeros(3)
 end
