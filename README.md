@@ -1,7 +1,7 @@
 # FlightGNC.jl
 Julia package of GNC algorithms for autonomous systems
 
-Open repository on [binder](https://mybinder.org/v2/gh/nhcho91/FlightGNC.jl/HEAD) / on [nbviewer](https://nbviewer.jupyter.org/github/nhcho91/FlightGNC.jl/tree/master/)
+Open repository on [binder](https://mybinder.org/v2/gh/nhcho91/FlightGNC.jl/master) / on [nbviewer](https://nbviewer.jupyter.org/github/nhcho91/FlightGNC.jl/tree/master/)
 <!-- [![Build Status](https://github.com/nhcho91/FlightGNC.jl/workflows/CI/badge.svg)](https://github.com/nhcho91/GNC.jl/actions) -->
 <!-- [![Coverage](https://codecov.io/gh/nhcho91/FlightGNC.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/nhcho91/GNC.jl) -->
 
