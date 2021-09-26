@@ -69,7 +69,6 @@ function sim_plot(p_M_0::Vector, v_M_0::Vector, p_T_0::Vector, v_T_0::Vector, s_
         #         )
         # f_3D = equal_AR_3D([p_Ms[:,1] p_Ts[:,1]], [p_Ms[:,2] p_Ts[:,2]], [p_Ms[:,3] p_Ts[:,3]], [], f_3D)
         
-        # alternative:  
         f_3D = equal_AR_3D([p_Ms[:,1] p_Ts[:,1]], [p_Ms[:,2] p_Ts[:,2]], [p_Ms[:,3] p_Ts[:,3]], legend_string)
         plot!(f_3D, xlabel = "x [m]", ylabel = "y [m]", zlabel = "z [m]", camera = (45,30))
 

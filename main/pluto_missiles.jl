@@ -36,9 +36,9 @@ begin
 	# To avoid redefinition of a named (or an anonymous) function at each time tuning parameters and running simulation,
 	# place the custom definition of a bias command function in a different cell from the cell containing sim_plot.
 
-	custom_bias(s,x,t) = zeros(3)
-	# option 2: function custom_bias(s,x,t)  return zeros(3) end
-	# option 3: custom_bias = (s,x,t) -> zeros(3)
+	custom_bias(s,x,t) = zeros(3)                           # option 1
+	# function custom_bias(s,x,t)  return zeros(3) end      # option 2
+	# custom_bias = (s,x,t) -> zeros(3)                     # option 3
 end
 
 # ╔═╡ b4aa1cc3-07de-4717-a39e-8a9c4b1c8512
