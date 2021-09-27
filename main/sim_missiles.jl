@@ -82,11 +82,3 @@ function sim_plot(p_M_0::Vector, v_M_0::Vector, p_T_0::Vector, v_T_0::Vector, s_
 
     return df, f
 end
-
-# Parallel execution
-# Threads.nthreads()
-
-# n   = 100 # number of scenarios
-# Ns  = 1:n |> Map(i -> rand(1)[1]) |> collect
-# Ns= 1:0.1:3
-# sim_results = Ns |> Map(N -> main(N)) |> tcollect
