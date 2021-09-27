@@ -24,7 +24,7 @@ function BPNG_cmd(s_guidance::BPNG)
         a_M      = a_M_PPNG + a_M_bias
         
         # if norm(a_M) >= A_M_max
-        #     a_M = normalize(a_M) * clamp(norm(a_M), -A_M_max, A_M_max)
+        #     a_M = normalize(a_M) * clamp(norm(a_M), 0, A_M_max)
         # end
         if dim == 2
             a_M = a_M[1:2]
