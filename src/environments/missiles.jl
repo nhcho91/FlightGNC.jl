@@ -10,8 +10,8 @@ end
 
 function State(env::PointMassMissile)
     @unpack dim = env
-    return function (p=zeros(dim), v=zeros(dim))
-        ComponentArray(p=p, v=v)
+    return function (p = zeros(dim), v = zeros(dim))
+        ComponentArray(p = p, v = v)
     end
 end
 
@@ -26,6 +26,7 @@ function Dynamics!(env::PointMassMissile)
             u = normalize(u) * clamp(norm(u), -A_max, A_max)
         end
         dx.v = u
+        @log u
     end
 end
 
@@ -41,15 +42,17 @@ end
 function State(env::PursuerEvadorMissile)
     @unpack pursuer, evador = env
     return function (x0_pursuer, x0_evador)
-        ComponentArray(pursuer=x0_pursuer, evador=x0_evador)
+        ComponentArray(pursuer = x0_pursuer, evador = x0_evador)
     end
 end
 
 function Dynamics!(env::PursuerEvadorMissile)
     @unpack pursuer, evador = env
     @Loggable function dynamics!(dx, x, params, t; u_pursuer, u_evador)
-        @onlylog r = norm(x.pursuer.p - x.evador.p)
-        @nested_log :pursuer Dynamics!(pursuer)(dx.pursuer, x.pursuer, nothing, t; u=u_pursuer)
-        @nested_log :evador Dynamics!(evador)(dx.evador, x.evador, nothing, t; u=u_evador)
+        @onlylog r   = norm(x.pursuer.p - x.evador.p)
+        @onlylog σ_M = atan(norm(cross(x.evador.p - x.pursuer.p, x.pursuer.v)), dot(x.evador.p - x.pursuer.p, x.pursuer.v))
+        
+        @nested_log :pursuer Dynamics!(pursuer)(dx.pursuer, x.pursuer, nothing, t; u = u_pursuer)
+        @nested_log :evador Dynamics!(evador)(dx.evador, x.evador, nothing, t; u = u_evador)
     end
 end
