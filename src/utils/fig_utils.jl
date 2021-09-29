@@ -24,9 +24,9 @@ function fig_print(x_data, y_data, fig_filename,
 	"""
 
 	#------ linespec
-	linestyle_preset   = [:solid	:solid	:solid	:solid	:dashdot :dash	:dot]
+	linestyle_preset   = repeat([:solid	:solid	:solid	:solid	:dashdot :dash	:dot], 1, 5)
 	# choose from [:auto, :solid, :dash, :dot, :dashdot, :dashdotdot]
-	markershape_preset = [:circle	:rect	:cross	:none	:none	 :none	:none]
+	markershape_preset = repeat([:circle	:rect	:cross	:none	:none	 :none	:none], 1, 5)
 	# choose from [:none, :auto, :circle, :rect, :star5, :diamond, :hexagon, :cross, :xcross, :utriangle, :dtriangle, :rtriangle, :ltriangle, :pentagon, :heptagon, :octagon, :star4, :star6, :star7, :star8, :vline, :hline, :+, :x].
 
 	if ~isempty(x_data) && ~isempty(y_data)
