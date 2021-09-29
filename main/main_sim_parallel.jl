@@ -27,7 +27,7 @@ function main(p_M_0::Vector, v_M_0::Vector, p_T_0::Vector, v_T_0::Vector, s_guid
             ṙ = dot(p_T-p_M, v_T-v_M) / r
             σ_M = acos( clamp( dot(normalize(p_T-p_M), normalize(v_M)), -1, 1 ) )
 
-            r < 0.1  || (r < 10 && ṙ >= 0) || σ_M > σ_M_lim + deg2rad(0.1)
+            (r < 0.5) || (r < 10 && ṙ >= 0) || (σ_M > σ_M_lim)
         end
     end
     affect!(integrator) = terminate!(integrator)  # See DiffEq.jl documentation
@@ -87,7 +87,7 @@ end
 A_M_max = 300
 
 N       = 3
-s_Bias  = ComponentArray(α = 1, δ = 0.01, n = 0, r_ref = 10E3, k = 4, m = 10)
+s_Bias  = ComponentArray(α = 1, δ = 0.01, n = 0, r_ref = 5E3, k = 4, m = 10)
 
 s_BPNG  = BPNG(N, dim, σ_M_lim, v̂_f_d, Bias_IACG_StationaryTarget_2D, s_Bias) 
 # Bias options: Bias_zero, Bias_IACG_StationaryTarget, Bias_IACG_StationaryTarget_2D
