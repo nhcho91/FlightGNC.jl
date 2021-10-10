@@ -6,13 +6,13 @@ dim     = 3
 p_M_0   = zeros(dim)
 
 V_M_0   = 300
-γ_M_0 	= deg2rad(0)
-χ_M_0 	= deg2rad(60)
+γ_M_0 	= deg2rad(45)
+χ_M_0 	= deg2rad(90)
 
-p_T_0   = [5E3; 0; 0]; #[10E3; 5E3; 5E3]
+p_T_0   = [10E3; 0; 0] #[10E3; 5E3; 5E3]
 v_T_0   = zeros(dim) # 100*[-1; 0; 0]
 
-γ_f_d   = 0
+γ_f_d   = deg2rad(-90)
 χ_f_d 	= deg2rad(180)
 
 if dim == 2
@@ -30,10 +30,10 @@ end
 
 
 σ_M_lim = deg2rad(90)
-A_M_max = 100
+A_M_max = 300
 
 N       = 3
-s_Bias  = ComponentArray(α = 1, δ = 0.01, n = 1, r_ref = 10E3, k = 9, m = 10)
+s_Bias  = ComponentArray(α = 1, δ = 0.01, n = 1, r_ref = 10E3, k = 3, m = 0, k̂_d = [1; 0; 0], case = 4)
 
 s_BPNG  = BPNG(N, dim, σ_M_lim, v̂_f_d, Bias_zero, s_Bias) 
 # Bias options: Bias_zero, Bias_IACG_StationaryTarget, Bias_IACG_StationaryTarget_2D
