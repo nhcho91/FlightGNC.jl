@@ -33,7 +33,7 @@ function main(p_M_0::Vector, v_M_0::Vector, p_T_0::Vector, v_T_0::Vector, s_guid
     # prob: DE problem, df: DataFrame		
     @time prob, df = FSimBase.sim(
                          x0,  # initial condition
-                         apply_inputs(Dynamics!(env);
+                         apply_inputs(Dynamics!(env,s_guidance);
                                       u_pursuer = BPNG_cmd(s_guidance),
                                       u_evador = (x, params, t) -> zeros(evador.dim));  # dynamics!; apply_inputs is exported from FS and is so useful for systems with inputs
                          tf = t_sim_f,

@@ -85,20 +85,26 @@ function equal_AR_3D(x_data, y_data, z_data, legend_string = :false, fig_handle 
 	d = maximum([diff([x12...]),diff([y12...]),diff([z12...])])[1] / 2
 	(xm, ym, zm) = (x12, y12, z12) .|> x->(x[1]+x[2])/2
 
-	if isnothing(fig_handle)
-		lw_val, N_markers, mks_val = 1.5, 10, 4
-		#------ linespec
-		linestyle_preset   = [:solid	:solid	:solid	:solid	:dashdot :dash	:dot]
-		markershape_preset = [:circle	:rect	:cross	:none	:none	 :none	:none]
-		#------ marker index
-		marker_idx = zeros(size(x_data, 1))
-		marker_idx[round.(Int, LinRange(1, size(x_data, 1), N_markers))] = mks_val*ones(N_markers)		
-			
-		#------ figure generation / augmentation
-		fig_handle = plot(x_data, y_data, z_data, linewidth = lw_val, linestyle = linestyle_preset,
-						label = legend_string, legend = :best,
-						markersize = marker_idx, markershape = markershape_preset)
+	lw_val, N_markers, mks_val = 1.5, 10, 4
+	#------ linespec
+	linestyle_preset   = repeat([:solid	:solid	:solid	:solid	:dashdot :dash	:dot], 1, 5)
+	markershape_preset = repeat([:circle	:rect	:cross	:none	:none	 :none	:none], 1, 5)
+	#------ marker index
+	marker_idx = zeros(size(x_data, 1))
+	marker_idx[round.(Int, LinRange(1, size(x_data, 1), N_markers))] = mks_val*ones(N_markers)		
 
+	#------ figure generation / augmentation
+	if ~isempty(x_data) && ~isempty(y_data) && ~isempty(z_data)
+		if isnothing(fig_handle)			
+			fig_handle = plot(x_data, y_data, z_data, linewidth = lw_val, linestyle = linestyle_preset,
+							label = legend_string, legend = :best,
+							markersize = marker_idx, markershape = markershape_preset)
+		else
+			plot!(fig_handle, x_data, y_data, z_data, linewidth = lw_val, linestyle = linestyle_preset[:,length(fig_handle.series_list)+1:end],
+					label = legend_string, legend = :best,
+					markersize = marker_idx, markershape = markershape_preset[:,length(fig_handle.series_list)+1:end])
+
+		end
 	end
 	plot!(fig_handle, aspect_ratio = :equal, xlims=(xm-d,xm+d), ylims=(ym-d,ym+d), zlims=(zm-d,zm+d))
 	
