@@ -33,7 +33,7 @@ end
 A_M_max = 300
 
 N       = 3
-s_Bias  = ComponentArray(α = 1, δ = 0.01, n = 1, r_ref = 10E3, k = 3, m = 0, k̂_d = [1; 0; 0], case = 4)
+s_Bias  = ComponentArray(α = 1, δ = 0.01, n = 1, r_ref = 10E3, k = 3, m = 0, k̂_d = [1; 0; 0], i_Ω_μ = 0, i_σ_M_lim = 1)
 
 s_BPNG  = BPNG(N, dim, σ_M_lim, v̂_f_d, Bias_zero, s_Bias) 
 # Bias options: Bias_zero, Bias_IACG_StationaryTarget, Bias_IACG_StationaryTarget_2D

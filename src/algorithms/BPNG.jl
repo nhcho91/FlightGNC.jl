@@ -36,7 +36,7 @@ end
 
 function Bias_IACG_StationaryTarget(s_guidance::BPNG, x, t)
     @unpack N, dim, σ_M_lim, v̂_f_d, s_Bias = s_guidance
-    @unpack α, δ, n, r_ref, k, m, k̂_d, case = s_Bias
+    @unpack α, δ, n, r_ref, k, m, k̂_d, i_Ω_μ, i_σ_M_lim = s_Bias
     (p_M, v_M, p_T, v_T) = (x.pursuer.p, x.pursuer.v, x.evador.p, x.evador.v)
     if dim == 2
         (p_M, v_M, p_T, v_T) = vcat.((p_M, v_M, p_T, v_T), 0)
@@ -60,48 +60,46 @@ function Bias_IACG_StationaryTarget(s_guidance::BPNG, x, t)
     k_e      = (n + 1) / r
 
     μ = 0
-    if case == 4
-        Ω_μ  = δ * ( r / r_ref )^m  # for evasion
-    elseif case == 5
+    if i_Ω_μ == 1
+        # desired manoeuvre plane alignment
         k_μ  = (m + 1) / r
-        μ        = atan(dot(cross(cross(v̂_f_pred, v̂_f_d), k̂_d), v̂_f_d), dot(cross(v̂_f_pred, v̂_f_d), k̂_d))
+        μ    = atan(dot(cross(cross(v̂_f_pred, v̂_f_d), k̂_d), v̂_f_d), dot(cross(v̂_f_pred, v̂_f_d), k̂_d))
         if abs(μ) > pi / 2 
             μ    = atan(dot(cross(cross(v̂_f_pred, v̂_f_d), -k̂_d), v̂_f_d), dot(cross(v̂_f_pred, v̂_f_d), -k̂_d))
         end 
-        Ω_μ  = k_μ * abs(ṙ) * μ   # for desired manoeuvre plane alignment
+        Ω_μ  = k_μ * abs(ṙ) * μ
+    elseif i_Ω_μ == 2
+        # evasion: monotonic decrease
+        Ω_μ  = δ * ( r / r_ref )^m
+    elseif i_Ω_μ == 3
+        # evasion: sinusoidal wave
+        Ω_μ  = δ * sin(( r / r_ref )^m)
+    elseif i_Ω_μ == 4
+        # evasion: square wave
+        Ω_μ  = δ * ifelse(mod(( r / r_ref )^m, 1) < θ, 1.0, -1.0)
+    elseif i_Ω_μ == 5
+        # evasion: sawtooth wave
+        Ω_μ  = δ * rem(( r / r_ref )^m, 1.0, RoundNearest) * 2
+    elseif i_Ω_μ == 6
+        # evasion: triangular wave
+        modr = mod(( r / r_ref )^m + 1/4, 1.0)
+        Ω_μ  = δ * ifelse(modr < 1/2, 4*modr - 1, -4*modr + 3)
+    elseif i_Ω_μ == 7
+        # evasion: uniform random number (s_rand: a fixed sequence of m uniform randoms in (-1,1) generated externally)
+        # Ω_μ  = δ * s_rand[1 + mod(floor(Int, t / r_ref), m)]
     else
         Ω_μ  = 0
     end
 
-    if case >= 3
-        k_σ  = 2 / pi * acos( clamp((σ_M / σ_M_lim)^k , -1, 1) )   # for look angle limiting
+    if i_σ_M_lim == 1
+        # lead angle limiter
+        k_σ  = 2 / pi * acos( clamp((σ_M / σ_M_lim)^k , -1, 1) )
     else
         k_σ  = 1
     end
 
-    # Design parameters for LCG_e_0
-    # K_e@vec_BPNG = K_r@LCG_e_0 / (N - 1) / r
-    # kwargs: δ = 0.01, n = 0, r_ref = Inf, k = 0, m = 0
-    # K_e = (N - 1 + δ) / (N - 1) / r * (1 + r / r_ref)^n
-    # Ω_μ = 0    
-    # K_σ = 1 + k * (1 - (abs(sin(σ_M) / sin(σ_M_lim)))^m)
-
     ω_f      = k_e * abs(ṙ) * e_v̂_f^α * normalize(cross(v̂_f_pred, v̂_f_d)) + Ω_μ * v̂_f_d
     ω_bias   = k_σ * ( -(N - 1) * dot(ω_f, k̂) * k̂  + sin(σ_M) * dot(ω_f, r̂ + cot(1 / (N - 1) * σ_M) * cross(k̂, r̂)) * cross(v̂_M, k̂) )
-    
-    # if dim == 2  # identical to the codes above, thus can be deleted
-    #     ê_z = [0; 0; 1]
-    #     if cross(p_T - p_M, v_M)[3] >= 0
-    #         k̂ = ê_z
-    #     else
-    #         k̂ = -ê_z
-    #     end
-    #     v̂_f_pred = v̂_M * cos(N / (N - 1) * σ_M) - cross(k̂, v̂_M) * sin(N / (N - 1) * σ_M)
-    #     e_v̂_f_signed = atan(dot(v̂_f_pred, cross(ê_z, v̂_f_d)), dot(v̂_f_pred, v̂_f_d))
-    #     # alternative: e_v̂_f_signed = atan(v̂_f_pred[2], v̂_f_pred[1]) - atan(v̂_f_d[2], v̂_f_d[1])
-    #     ω_f     = K_e(r, N, δ, n, r_ref) * ṙ  * sign(e_v̂_f_signed) * abs(e_v̂_f_signed)^α * ê_z
-    #     ω_bias  = K_σ(σ_M, σ_M_lim, k, m) * ( -(N - 1) * ω_f )
-    # end
     
     a_M_bias = cross(ω_bias, v_M)
 
@@ -147,6 +145,27 @@ function Bias_IACG_StationaryTarget_2D(s_guidance::BPNG, x, t)
     a_M_bias = A_M_bias * [-sin(γ_M); cos(γ_M); 0]
 
     return a_M_bias
+
+    # if dim == 2  # identical to the codes above, thus can be deleted
+    #     Design parameters for LCG_e_0
+    #     K_e@vec_BPNG = K_r@LCG_e_0 / (N - 1) / r
+    #     kwargs: δ = 0.01, n = 0, r_ref = Inf, k = 0, m = 0
+    #     K_e = (N - 1 + δ) / (N - 1) / r * (1 + r / r_ref)^n
+    #     Ω_μ = 0    
+    #     K_σ = 1 + k * (1 - (abs(sin(σ_M) / sin(σ_M_lim)))^m)
+    #
+    #     ê_z = [0; 0; 1]
+    #     if cross(p_T - p_M, v_M)[3] >= 0
+    #         k̂ = ê_z
+    #     else
+    #         k̂ = -ê_z
+    #     end
+    #     v̂_f_pred = v̂_M * cos(N / (N - 1) * σ_M) - cross(k̂, v̂_M) * sin(N / (N - 1) * σ_M)
+    #     e_v̂_f_signed = atan(dot(v̂_f_pred, cross(ê_z, v̂_f_d)), dot(v̂_f_pred, v̂_f_d))
+    #     # alternative: e_v̂_f_signed = atan(v̂_f_pred[2], v̂_f_pred[1]) - atan(v̂_f_d[2], v̂_f_d[1])
+    #     ω_f     = K_e(r, N, δ, n, r_ref) * ṙ  * sign(e_v̂_f_signed) * abs(e_v̂_f_signed)^α * ê_z
+    #     ω_bias  = K_σ(σ_M, σ_M_lim, k, m) * ( -(N - 1) * ω_f )
+    # end
 end
 
 function Bias_zero(s_guidance::BPNG, x, t)
