@@ -267,7 +267,7 @@ for i_α in 1:length(α_list)
                         xlabel=L"\gamma_0 \textrm{~[deg]}", ylabel=L"\gamma_f_d \textrm{~[deg]}", fill=true, seriescolor=:coolwarm, ylims=extrema(γ_xref_f_d_list))
         plot!(f_r_f, γ_xref_M_0_list, [γ_xref_f_d_lb γ_xref_f_d_ub], linecolor=:red, linestyle=:dash, linewidth=2,
                     label=["LB" "UB"], ylims=extrema(γ_xref_f_d_list)) # title="r_f: α = $α, n = $n"
-        f_r_f = fig_print([], [], "r_f_alpha_$(i_α)_n_$(i_n)"; fig_handle=f_r_f) 	# To just save the result
+        f_r_f = fig_print([], [], "r_f_alpha_$(i_α)_n_$(i_n)", [], [], [], f_r_f) 	# To just save the result
         display(f_r_f)
         
         # r_min
@@ -275,7 +275,7 @@ for i_α in 1:length(α_list)
         xlabel=L"\gamma_0 \textrm{~[deg]}", ylabel=L"\gamma_f_d \textrm{~[deg]}", fill=true, seriescolor=:coolwarm, ylims=extrema(γ_xref_f_d_list))
         plot!(f_r_min, γ_xref_M_0_list, [γ_xref_f_d_lb γ_xref_f_d_ub], linecolor=:red, linestyle=:dash, linewidth=2,
                     label=["LB" "UB"], ylims=extrema(γ_xref_f_d_list)) # title="r_f: α = $α, n = $n"
-        f_r_min = fig_print([], [], "r_min_alpha_$(i_α)_n_$(i_n)"; fig_handle=f_r_min) 	# To just save the result
+        f_r_min = fig_print([], [], "r_min_alpha_$(i_α)_n_$(i_n)", [], [], [], f_r_min) 	# To just save the result
         display(f_r_min)
 
         # OX
@@ -290,7 +290,7 @@ for i_α in 1:length(α_list)
             end
         end
         plot!(f_OX, xlabel=L"\gamma_0 \textrm{~[deg]}", ylabel=L"\gamma_f_d \textrm{~[deg]}")
-        f_OX = fig_print([], [], "OX_alpha_$(i_α)_n_$(i_n)"; fig_handle=f_OX) 	# To just save the result
+        f_OX = fig_print([], [], "OX_alpha_$(i_α)_n_$(i_n)", [], [], [], f_OX) 	# To just save the result
         display(f_OX)
 
         # e_γ_f
@@ -302,7 +302,7 @@ for i_α in 1:length(α_list)
                 e_γ_f_list = 180 / pi .* γ_xref_pred_list[i][j] .- γ_xref_f_d
                 plot!(f_e_γ_f, t_list[i][j], abs.(e_γ_f_list), label=:false, xlabel="t [s]", ylabel="|e_γ_f| [deg]", ylims=(0, 60))
             end
-            f_e_γ_f = fig_print([], [], "e_gamma_f_alpha_$(i_α)_n_$(i_n)_ic_$i"; fig_handle=f_e_γ_f) 	# To just save the result
+            f_e_γ_f = fig_print([], [], "e_gamma_f_alpha_$(i_α)_n_$(i_n)_ic_$i", [], [], [], f_e_γ_f) 	# To just save the result
             # display(f_e_γ_f)
         end
         
@@ -314,7 +314,7 @@ for i_α in 1:length(α_list)
             for j in 1:length(s_BPNG_list)
                 plot!(f_xy, x_list[i][j], y_list[i][j], label=:false, xlabel="x [m]", ylabel="y [m]", ylims=(-500, 4.5E3))
             end
-            f_xy = fig_print([], [], "xy_alpha_$(i_α)_n_$(i_n)_ic_$i"; fig_handle=f_xy, ar_val=:equal) 	# To just save the result
+            f_xy = fig_print([], [], "xy_alpha_$(i_α)_n_$(i_n)_ic_$i", [], [], [], f_xy, ar_val=:equal) 	# To just save the result
             # display(f_xy)
         end
 
@@ -322,7 +322,7 @@ for i_α in 1:length(α_list)
         # for j in 1:length(s_BPNG_list)
         #     plot!(f_r, t_list[i][j], r_list[i][j], label = :false, xlabel = "t [s]", ylabel = "r [m]")
         # end
-        # f_r = fig_print([], [], "r"; fig_handle = f_r) 	# To just save the result
+        # f_r = fig_print([], [], "r", [], [], [], f_r) 	# To just save the result
         # display(f_r)
 
 
@@ -330,7 +330,7 @@ for i_α in 1:length(α_list)
         # for j in 1:length(s_BPNG_list)
         #     plot!(f_σ, t_list[i][j], rad2deg.(σ_M_list[i][j]), label = :false, xlabel = "t [s]", ylabel = "σ_M [deg]")
         # end
-        # f_σ = fig_print([], [], "sigma_M"; fig_handle = f_σ) 	# To just save the result
+        # f_σ = fig_print([], [], "sigma_M", [], [], [], f_σ) 	# To just save the result
         # display(f_σ)
 
         # f_χ = plot()
@@ -338,14 +338,14 @@ for i_α in 1:length(α_list)
         #     plot!(f_χ, t_list[i][j], rad2deg.(χ_list[i][j]), label = :false, xlabel = "t [s]", ylabel = "χ_M [deg]")
         #     plot!(f_χ, t_list[i][j][[1,end],1], rad2deg.(χ_f_d_list[j]*ones(2)), label = :false, linestyle = :dot, linewidth = 0.5)
         # end
-        # f_χ = fig_print([], [], "chi_M"; fig_handle = f_χ) 	# To just save the result
+        # f_χ = fig_print([], [], "chi_M", [], [], [], f_χ) 	# To just save the result
         # display(f_χ)
 
         # f_A = plot()
         # for j in 1:length(s_BPNG_list)
         #     plot!(f_A, t_list[i][j], A_list[i][j], label = :false, xlabel = "t [s]", ylabel = "A_M [m/s^2]")
         # end
-        # f_A = fig_print([], [], "A_M"; fig_handle = f_A) 	# To just save the result
+        # f_A = fig_print([], [], "A_M", [], [], [], f_A) 	# To just save the result
         # display(f_A)
 
     end

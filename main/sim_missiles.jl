@@ -9,8 +9,8 @@ V_M_0   = 300
 γ_M_0 	= deg2rad(45)
 χ_M_0 	= deg2rad(90)
 
-p_T_0   = [10E3; 0; 0] #[10E3; 5E3; 5E3]
-v_T_0   = zeros(dim) # 100*[-1; 0; 0]
+p_T_0   = [10E3; 0; 0]
+v_T_0   = zeros(dim)
 
 γ_f_d   = deg2rad(-90)
 χ_f_d 	= deg2rad(180)
@@ -28,7 +28,6 @@ if dim == 2
 end
 
 
-
 σ_M_lim = deg2rad(90)
 A_M_max = 300
 
@@ -36,7 +35,7 @@ N       = 3
 s_Bias  = ComponentArray(α = 1, δ = 0.01, n = 1, r_ref = 10E3, k = 3, m = 0, k̂_d = [1; 0; 0], i_Ω_μ = 0, i_σ_M_lim = 1)
 
 s_BPNG  = BPNG(N, dim, σ_M_lim, v̂_f_d, Bias_zero, s_Bias) 
-# Bias options: Bias_zero, Bias_IACG_StationaryTarget, Bias_IACG_StationaryTarget_2D
+# Bias options: Bias_zero, Bias_IACG_StationaryTarget
 
 function sim_plot(p_M_0::Vector, v_M_0::Vector, p_T_0::Vector, v_T_0::Vector, s_BPNG::BPNG, A_M_max::Number)
     # Execute simulation
@@ -54,14 +53,10 @@ function sim_plot(p_M_0::Vector, v_M_0::Vector, p_T_0::Vector, v_T_0::Vector, s_
     legend_string = ["Missile" "Target"]
     
     if dim == 2
-        f = fig_print([p_Ms[:,1] p_Ts[:,1]], [p_Ms[:,2] p_Ts[:,2]], "", legend_string, "x [m]", "y [m]"; ar_val = :equal, save_file = 0)
-        # plot!(f, xlims=(0, 6E3), ylims=(-3E3, 3E3))
-
-        # f = fig_print(ts, [p_Ms[:,1] p_Ts[:,2]], "", ["x" "y"], "t [s]", "pos [m]"; save_file = 0)
+        f = fig_print([p_Ms[:,1] p_Ts[:,1]], [p_Ms[:,2] p_Ts[:,2]], [], legend_string, "x [m]", "y [m]"; ar_val = :equal, save_file = 0)
 
     elseif dim == 3	
-        f_2D= fig_print([p_Ms[:,1] p_Ts[:,1]], [p_Ms[:,2] p_Ts[:,2]], "", legend_string, "x [m]", "y [m]"; ar_val = :equal, save_file = 0)
-        # display(f_2D)
+        f_2D= fig_print([p_Ms[:,1] p_Ts[:,1]], [p_Ms[:,2] p_Ts[:,2]], [], legend_string, "x [m]", "y [m]"; ar_val = :equal, save_file = 0)
 
         # f_3D = plot([p_Ms[:,1] p_Ts[:,1]], [p_Ms[:,2] p_Ts[:,2]], [p_Ms[:,3] p_Ts[:,3]], label = legend_string, 
         #         xlabel = "x [m]", ylabel = "y [m]", zlabel = "z [m]", aspect_ratio = :equal,
@@ -75,10 +70,8 @@ function sim_plot(p_M_0::Vector, v_M_0::Vector, p_T_0::Vector, v_T_0::Vector, s_
         f = plot(f_2D, f_3D, layout = (2,1), size = (600, 1200))
     end
     
-    f = fig_print([], [], "Trajectory"; fig_handle = f, ar_val = :equal) 	# To just save the result
+    f = fig_print([], [], "Trajectory", [], [], [], f; ar_val = :equal) 	# To save the result
     display(f)
-
-    
 
     return df, f
 end

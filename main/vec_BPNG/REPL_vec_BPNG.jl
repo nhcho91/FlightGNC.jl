@@ -125,10 +125,10 @@ r_min_result = hcat(r_min_result...)'
 # xy
 f_2D = plot()
 for i in 1:length(s_BPNG_list)
-    fig_print(x_list[i], y_list[i], [], label_string[i], "\$x ~[\\textrm{m}]\$", "\$y ~[\\textrm{m}]\$"; fig_handle=f_2D, save_file=0)
+    fig_print(x_list[i], y_list[i], [], label_string[i], "\$x ~[\\textrm{m}]\$", "\$y ~[\\textrm{m}]\$", f_2D; save_file=0)
 end
 plot!(f_2D, legend=:bottomleft)
-fig_print([], [], "Traj2D_Case$(case)"; fig_handle=f_2D, ar_val=:equal, lfs_val=6)
+fig_print([], [], "Traj2D_Case$(case)", [], [], [], f_2D; ar_val=:equal, lfs_val=6)
 # display(f_2D)
 
 # xyz
@@ -138,69 +138,69 @@ for i in 1:length(s_BPNG_list)
     # plot!(f_3D, x_list[i], y_list[i], z_list[i], label_string[i])
 end
 plot!(f_3D, xlabel="\$x ~[\\textrm{m}]\$", ylabel="\$y ~[\\textrm{m}]\$", zlabel="\$z ~[\\textrm{m}]\$", legend=:topleft, camera=(50, 40))
-fig_print([], [], "Traj_Case$(case)"; fig_handle=f_3D, ar_val=:equal, lfs_val=6)
+fig_print([], [], "Traj_Case$(case)", [], [], [], f_3D; ar_val=:equal, lfs_val=6)
 # display(f_3D)
 
 # r
 f_r = plot()
 for i in 1:length(s_BPNG_list)
-    fig_print(t_list[i], r_list[i], [], :false, "\$t ~[\\textrm{s}]\$", "\$r ~[\\textrm{m}]\$"; fig_handle=f_r, save_file=0)
+    fig_print(t_list[i], r_list[i], [], :false, "\$t ~[\\textrm{s}]\$", "\$r ~[\\textrm{m}]\$", f_r; save_file=0)
 end
-fig_print([], [], "r_Case$(case)"; fig_handle=f_r)
+fig_print([], [], "r_Case$(case)", [], [], [], f_r)
 # display(f_r)
 
 # σ_M
 f_σ = plot()
 for i in 1:length(s_BPNG_list)
-    fig_print(t_list[i], rad2deg.(σ_M_list[i]), [], :false, "\$t ~[\\textrm{s}]\$", "\$\\sigma ~[\\textrm{deg}]\$"; fig_handle=f_σ, save_file=0)
+    fig_print(t_list[i], rad2deg.(σ_M_list[i]), [], :false, "\$t ~[\\textrm{s}]\$", "\$\\sigma ~[\\textrm{deg}]\$", f_σ; save_file=0)
     
     if case == 3
         plot!(f_σ, t_list[i][[1,end],1], rad2deg.(s_BPNG_list[i].σ_M_lim * ones(2)), label=:false,linewidth=0.5, linestyle=:dash, linecolor=:red)
     end
 end
-fig_print([], [], "sigma_Case$(case)"; fig_handle=f_σ)
+fig_print([], [], "sigma_Case$(case)", [], [], [], f_σ)
 # display(f_σ)
 
 # e
 f_e = plot()
 for i in 1:length(s_BPNG_list)
-    fig_print(t_list[i], rad2deg.(e_v̂_f_list[i]), [], :false, "\$t ~[\\textrm{s}]\$", "\$e ~[\\textrm{deg}]\$"; fig_handle=f_e, save_file=0)
+    fig_print(t_list[i], rad2deg.(e_v̂_f_list[i]), [], :false, "\$t ~[\\textrm{s}]\$", "\$e ~[\\textrm{deg}]\$", f_e; save_file=0)
 end
-fig_print([], [], "e_Case$(case)"; fig_handle=f_e)
+fig_print([], [], "e_Case$(case)", [], [], [], f_e)
 # display(f_e)
 
 # A = ||a_M||
 f_A = plot()
 for i in 1:length(s_BPNG_list)
-    fig_print(t_list[i], A_list[i], [], :false, "\$t ~[\\textrm{s}]\$", "\$\\left||\\mathbf{a}\\right|| ~[\\textrm{m/s}^{2}]\$"; fig_handle=f_A, save_file=0)
+    fig_print(t_list[i], A_list[i], [], :false, "\$t ~[\\textrm{s}]\$", "\$\\left||\\mathbf{a}\\right|| ~[\\textrm{m/s}^{2}]\$", f_A; save_file=0)
 end
 plot!(f_A, legend=:topleft)
-fig_print([], [], "A_Case$(case)"; fig_handle=f_A)
+fig_print([], [], "A_Case$(case)", [], [], [], f_A)
 # display(f_A)
 
 # A_bias = ||a_M_bias||
 f_A_bias = plot()
 for i in 1:length(s_BPNG_list)
-    fig_print(t_list[i], A_bias_list[i], [], :false, "\$t ~[\\textrm{s}]\$", "\$\\left||\\mathbf{a}_{bias}\\right|| ~[\\textrm{m/s}^{2}]\$"; fig_handle=f_A_bias, save_file=0)
+    fig_print(t_list[i], A_bias_list[i], [], :false, "\$t ~[\\textrm{s}]\$", "\$\\left||\\mathbf{a}_{bias}\\right|| ~[\\textrm{m/s}^{2}]\$", f_A_bias; save_file=0)
 end
-fig_print([], [], "A_bias_Case$(case)"; fig_handle=f_A_bias)
+fig_print([], [], "A_bias_Case$(case)", [], [], [], f_A_bias)
 # display(f_A_bias)
 
 # Ω_bias = ||ω_bias||
 f_Ω_bias = plot()
 for i in 1:length(s_BPNG_list)
-    fig_print(t_list[i], Ω_bias_list[i], [], :false, "\$t ~[\\textrm{s}]\$", "\$\\left||\\mathbf{\\omega}_{bias}\\right|| ~[\\textrm{rad/s}]\$"; fig_handle=f_Ω_bias, save_file=0)
+    fig_print(t_list[i], Ω_bias_list[i], [], :false, "\$t ~[\\textrm{s}]\$", "\$\\left||\\mathbf{\\omega}_{bias}\\right|| ~[\\textrm{rad/s}]\$", f_Ω_bias; save_file=0)
 end
-fig_print([], [], "omega_bias_Case$(case)"; fig_handle=f_Ω_bias)
+fig_print([], [], "omega_bias_Case$(case)", [], [], [], f_Ω_bias)
 # display(f_Ω_bias)
 
 # μ
 if case == 5
     f_μ = plot()
     for i in 1:length(s_BPNG_list)
-        fig_print(t_list[i], rad2deg.(μ_list[i]), [], :false, "\$t ~[\\textrm{s}]\$", "\$\\mu ~[\\textrm{deg}]\$"; fig_handle=f_μ, save_file=0)
+        fig_print(t_list[i], rad2deg.(μ_list[i]), [], :false, "\$t ~[\\textrm{s}]\$", "\$\\mu ~[\\textrm{deg}]\$", f_μ; save_file=0)
     end
-    fig_print([], [], "mu_Case$(case)"; fig_handle=f_μ)
+    fig_print([], [], "mu_Case$(case)", [], [], [], f_μ)
     # display(f_μ)
 end
 
@@ -208,10 +208,10 @@ end
 if case >= 4
     f_Ω_μ = plot()
     for i in 1:length(s_BPNG_list)
-        fig_print(t_list[i], Ω_μ_list[i], [], :false, "\$t ~[\\textrm{s}]\$", "\$\\Omega_{\\mu} ~[\\textrm{rad/s}]\$"; fig_handle=f_Ω_μ, save_file=0)
+        fig_print(t_list[i], Ω_μ_list[i], [], :false, "\$t ~[\\textrm{s}]\$", "\$\\Omega_{\\mu} ~[\\textrm{rad/s}]\$", f_Ω_μ; save_file=0)
     end
-    fig_print([], [], "Omega_mu_Case$(case)"; fig_handle=f_Ω_μ)
+    fig_print([], [], "Omega_mu_Case$(case)", [], [], [], f_Ω_μ)
     # display(f_Ω_μ)
 end
 
-println("EOS")
+println("End\n")

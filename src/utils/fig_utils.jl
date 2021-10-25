@@ -1,6 +1,5 @@
-function fig_print(x_data, y_data, fig_filename, 
-					legend_string = nothing, xlabel_string = nothing, ylabel_string = nothing; 
-					fig_handle = nothing, 
+function fig_print(x_data, y_data, fig_filename = [], 
+					legend_string = nothing, xlabel_string = nothing, ylabel_string = nothing, fig_handle = nothing;  
 					lw_val = 1.5, N_markers = 10, mks_val = 4, 
 					gfs_val = 9, lfs_val = 8, ar_val = :auto, save_file = 1)
 	"""
