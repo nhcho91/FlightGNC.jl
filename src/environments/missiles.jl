@@ -1,8 +1,8 @@
 abstract type AbstractMissile <: AbstractEnv end
 
-"""
-Single Point Mass Vehicle Kinematics
-"""
+#-----------------------------------------
+# Single Point Mass Vehicle Kinematics
+#-----------------------------------------
 struct PointMassMissile <: AbstractMissile
     dim::Int  # @assert dim == 2 || dim == 3
     A_max::Float64
@@ -31,9 +31,9 @@ function Dynamics!(env::PointMassMissile)
 end
 
 
-"""
-1 Pursuer on 1 Evador Engagement
-"""
+#-----------------------------------------
+# 1 Pursuer on 1 Evador Engagement
+#-----------------------------------------
 struct PursuerEvadorMissile <: AbstractMissile
     pursuer::PointMassMissile
     evador::PointMassMissile
@@ -55,5 +55,50 @@ function Dynamics!(env::PursuerEvadorMissile, s_guidance::BPNG)
         
         @nested_log :pursuer Dynamics!(pursuer)(dx.pursuer, x.pursuer, nothing, t; u = u_pursuer)
         @nested_log :evador Dynamics!(evador)(dx.evador, x.evador, nothing, t; u = u_evador)
+    end
+end
+
+
+#-----------------------------------------
+# Single Point Mass Vehicle Vertical Plane Dynamics
+#-----------------------------------------
+struct VerticalPlaneDynamicMissile <: AbstractMissile
+    m::Float64
+    S::Float64
+    C_D_0::Float64
+    K::Float64
+    ρ₀::Float64
+    H::Float64
+    g::Float64
+end
+
+function State(env::VerticalPlaneDynamicMissile)
+    return function (x₀, h₀, γ₀, V₀)
+        ComponentArray(x = x₀, h = h₀, γ = γ₀, V = V₀)
+    end
+end
+
+function Params(env::VerticalPlaneDynamicMissile)
+    return function (R₀, c₀)
+        ComponentArray(R = R₀, c = c₀)
+    end
+end
+
+function Dynamics!(env::VerticalPlaneDynamicMissile)
+    @unpack m, S, C_D_0, K, ρ₀, H, g = env
+    @Loggable function dynamics!(ds, s, params, t; u)
+        @unpack x, h, γ, V = s
+        @unpack R, c = params
+        @log x, h, γ, V, u
+        @onlylog R, c
+
+        ρ   = ρ₀ * exp( -h / H )
+        C_L = m * u / ( 1/2 * ρ * V^2 * S )
+        C_D = C_D_0 + K * C_L^2
+
+        ds.x = V * cos(γ)
+        ds.h = V * sin(γ)
+        ds.γ = u / V - g / V * cos(γ)
+        ds.V = -C_D / C_L * u - g * sin(γ)
     end
 end

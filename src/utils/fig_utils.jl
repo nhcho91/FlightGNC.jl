@@ -28,19 +28,25 @@ function fig_print(x_data, y_data, fig_filename = [],
 	markershape_preset = repeat([:circle	:rect	:cross	:none	], 1, 5)
 	# choose from [:none, :auto, :circle, :rect, :star5, :diamond, :hexagon, :cross, :xcross, :utriangle, :dtriangle, :rtriangle, :ltriangle, :pentagon, :heptagon, :octagon, :star4, :star6, :star7, :star8, :vline, :hline, :+, :x].
 
-	if ~isempty(x_data) && ~isempty(y_data)
-	#------ marker index
-		marker_idx = zeros(size(x_data, 1))
-		marker_idx[round.(Int, LinRange(1, size(x_data, 1), N_markers))] = mks_val*ones(N_markers)
-		# marker_idx = zeros(length(fig_handle.series_list[1].plotattributes[:x]))
-		# marker_idx[round.(Int, LinRange(1,length(fig_handle.series_list[1].plotattributes[:x]), N_markers))] = mks_val*ones(N_markers)
-			
+	if ~isempty(x_data) && ~isempty(y_data)	
 	#------ figure generation / augmentation
 		if isnothing(fig_handle)
 		fig_handle = plot(x_data, y_data, linewidth = lw_val, linestyle = linestyle_preset,
-					label = legend_string, legend = :best,
-					markersize = marker_idx, markershape = markershape_preset)
+					label = legend_string, legend = :best)
+					# markersize = marker_idx, markershape = markershape_preset)
+
+			#--- marker index (post-processing)
+			for i in 1 : length(fig_handle.series_list)
+				marker_idx = zeros(length(fig_handle.series_list[i].plotattributes[:x]))
+				marker_idx[round.(Int, LinRange(1,length(fig_handle.series_list[i].plotattributes[:x]), N_markers))] = mks_val*ones(N_markers)
+				fig_handle.series_list[i].plotattributes[:markersize]  = marker_idx
+				fig_handle.series_list[i].plotattributes[:markershape] = markershape_preset[i]
+			end
+
 		else
+			#--- marker index (pre-processing)
+			marker_idx = zeros(size(x_data, 1))
+			marker_idx[round.(Int, LinRange(1, size(x_data, 1), N_markers))] = mks_val*ones(N_markers)
 			plot!(fig_handle, x_data, y_data, linewidth = lw_val, linestyle = linestyle_preset[:,length(fig_handle.series_list)+1:end],
 					label = legend_string, legend = :best,
 					markersize = marker_idx, markershape = markershape_preset[:,length(fig_handle.series_list)+1:end])
