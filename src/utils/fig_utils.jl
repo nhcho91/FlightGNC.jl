@@ -1,6 +1,6 @@
 function fig_print(x_data, y_data, fig_filename = [], 
 					legend_string = nothing, xlabel_string = nothing, ylabel_string = nothing, fig_handle = nothing;  
-					lw_val = 1.5, N_markers = 10, mks_val = 4, 
+					lw_val = 1.5, lgnd_val = :best, N_markers = 10, mks_val = 4, 
 					gfs_val = 9, lfs_val = 8, ar_val = :auto, save_file = 1)
 	"""
 	Figure generation and exporting to file
@@ -32,7 +32,7 @@ function fig_print(x_data, y_data, fig_filename = [],
 	#------ figure generation / augmentation
 		if isnothing(fig_handle)
 		fig_handle = plot(x_data, y_data, linewidth = lw_val, linestyle = linestyle_preset,
-					label = legend_string, legend = :best)
+					label = legend_string, legend = lgnd_val)
 					# markersize = marker_idx, markershape = markershape_preset)
 
 			#--- marker index (post-processing)
@@ -48,7 +48,7 @@ function fig_print(x_data, y_data, fig_filename = [],
 			marker_idx = zeros(size(x_data, 1))
 			marker_idx[round.(Int, LinRange(1, size(x_data, 1), N_markers))] = mks_val*ones(N_markers)
 			plot!(fig_handle, x_data, y_data, linewidth = lw_val, linestyle = linestyle_preset[:,length(fig_handle.series_list)+1:end],
-					label = legend_string, legend = :best,
+					label = legend_string, legend = lgnd_val,
 					markersize = marker_idx, markershape = markershape_preset[:,length(fig_handle.series_list)+1:end])
 		end
 	end
@@ -72,6 +72,7 @@ function fig_print(x_data, y_data, fig_filename = [],
 			end
 		end
 		plot!(fig_handle, legendfontsize = lfs_val)
+		plot!(fig_handle, legend = lgnd_val)
 
 	#------ save
 		if save_file == 1

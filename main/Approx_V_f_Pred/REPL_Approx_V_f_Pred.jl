@@ -29,9 +29,7 @@ x_plan, h_plan, γ_plan, V_plan, A_L_plan, R_plan, c_plan = plan_path(x₀, h₀
             label_string_xplot = ["PlanSim" "RePlanSim" "Plan" ]
             label_string_tplot = ["PlanSim" "RePlanSim"]
 
-            f_x_h   = fig_print([x_plansim, x_replansim, x_plan], [h_plansim, h_replansim, h_plan],         "x_h_$(round(Int, Δt_plan_update))_$(Approx_mode)", label_string_xplot, "\$x ~[\\textrm{m}]\$", "\$h ~[\\textrm{m}]\$"; save_file = 0) # ar_val = :equal
-            plot!(f_x_h, legend = :bottomleft)
-            f_x_h = fig_print([], [], "x_h_$(round(Int, Δt_plan_update))_$(Approx_mode)", [], [], [], f_x_h) 
+            f_x_h   = fig_print([x_plansim, x_replansim, x_plan], [h_plansim, h_replansim, h_plan],         "x_h_$(round(Int, Δt_plan_update))_$(Approx_mode)", label_string_xplot, "\$x ~[\\textrm{m}]\$", "\$h ~[\\textrm{m}]\$"; save_file = 0, lgnd_val = :bottomleft) # ar_val = :equal
             f_x_γ   = fig_print([x_plansim, x_replansim, x_plan], [γ_plansim, γ_replansim, γ_plan],     "x_gamma_$(round(Int, Δt_plan_update))_$(Approx_mode)", label_string_xplot, "\$x ~[\\textrm{m}]\$", "\$\\gamma ~[\\textrm{deg}]\$")
             f_x_V   = fig_print([x_plansim, x_replansim, x_plan], [V_plansim, V_replansim, V_plan],         "x_V_$(round(Int, Δt_plan_update))_$(Approx_mode)", label_string_xplot, "\$x ~[\\textrm{m}]\$", "\$V ~[\\textrm{m}/\\textrm{s}]\$")
             f_x_A_L = fig_print([x_plansim, x_replansim, x_plan], [A_L_plansim, A_L_replansim, A_L_plan], "x_A_L_$(round(Int, Δt_plan_update))_$(Approx_mode)", label_string_xplot, "\$x ~[\\textrm{m}]\$", "\$A_{L} ~[\\textrm{m}/\\textrm{s}^{2}]\$")
