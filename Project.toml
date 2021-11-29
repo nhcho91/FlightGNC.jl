@@ -20,7 +20,7 @@ UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 [compat]
 ComponentArrays = "0.10"
 Convex = "0.14"
-FSimBase = "0.1"
+FSimBase = "0.2"
 Mosek = "1.2"
 MosekTools = "0.9"
 Optim = "1.4"
