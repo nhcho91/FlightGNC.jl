@@ -4,8 +4,8 @@ using LinearAlgebra
 using Reexport
 @reexport using FSimBase
 const FSBase = FSimBase
-import FSimBase: State, Params, Dynamics!, Dynamics
-import FSimBase: Command
+import FSimBase: State, Params, Dynamics!, Dynamics, Command, apply_inputs, Simulator, solve, reinit!, log!, step!, step_until!
+
 using UnPack, ComponentArrays
 using Plots  # required for fig_print
 using Convex, Mosek, MosekTools

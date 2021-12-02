@@ -35,19 +35,34 @@ function main(p_M_0::Vector, v_M_0::Vector, p_T_0::Vector, v_T_0::Vector, s_guid
     cb = CallbackSet(cb_stop)  # useful for multiple callbacks
         
     # Execute Simulation
-    # prob: DE problem, df: DataFrame		
-    @time prob, df = FSimBase.sim(
-                         x0,  # initial condition
-                         apply_inputs(Dynamics!(env, s_guidance);
-                                      u_pursuer = BPNG_cmd(s_guidance),
-                                      u_evador = (x, params, t) -> zeros(evador.dim));  # dynamics!; apply_inputs is exported from FS and is so useful for systems with inputs
-                         tf = t_sim_f,
-                         savestep = Δt,  # savestep is NOT simulation step
-                         solver = Tsit5(),
-                         callback = cb,
-                         reltol = 1e-8,
-                         abstol = 1e-8
-                        )  # sim is exported from FS
+    # prob: DE problem, df: DataFrame
+    simulator = Simulator(x0, 
+                        apply_inputs(Dynamics!(env, s_guidance);
+                                    u_pursuer = BPNG_cmd(s_guidance),
+                                    u_evador = (x, params, t) -> zeros(evador.dim));
+                        Problem = :ODE,
+                        solver = Tsit5(),
+                        tf = t_sim_f)
+
+    # Non-interactive simulation: solve approach (automatically reinitialised)
+    @time df = solve(simulator; 
+                    savestep = Δt, 
+                    callback = cb, 
+                    reltol = 1e-8, 
+                    abstol = 1e-8)
+
+    # @time prob, df = FSimBase.sim(
+    #                      x0,  # initial condition
+    #                      apply_inputs(Dynamics!(env, s_guidance);
+    #                                   u_pursuer = BPNG_cmd(s_guidance),
+    #                                   u_evador = (x, params, t) -> zeros(evador.dim));  # dynamics!; apply_inputs is exported from FS and is so useful for systems with inputs
+    #                      tf = t_sim_f,
+    #                      savestep = Δt,  # savestep is NOT simulation step
+    #                      solver = Tsit5(),
+    #                      callback = cb,
+    #                      reltol = 1e-8,
+    #                      abstol = 1e-8
+    #                     )  # sim is exported from FS
 
 	return df
 end
@@ -69,10 +84,13 @@ function sim_plot(p_M_0::Vector, v_M_0::Vector, p_T_0::Vector, v_T_0::Vector, s_
     legend_string = ["Missile" "Target"]
     
     if dim == 2
-        f = fig_print([p_Ms[:,1] p_Ts[:,1]], [p_Ms[:,2] p_Ts[:,2]], [], legend_string, "x [m]", "y [m]"; ar_val = :equal, save_file = 0) 
+        f = fig_print([p_Ms[:,1] p_Ts[:,1]], [p_Ms[:,2] p_Ts[:,2]], "", legend_string, "x [m]", "y [m]"; ar_val = :equal, save_file = 0)
+        # plot!(f, xlims=(0, 6E3), ylims=(-3E3, 3E3))
+
+        # f = fig_print(ts, [p_Ms[:,1] p_Ts[:,2]], "", ["x" "y"], "t [s]", "pos [m]"; save_file = 0)
 
     elseif dim == 3	
-        f_2D= fig_print([p_Ms[:,1] p_Ts[:,1]], [p_Ms[:,2] p_Ts[:,2]], [], legend_string, "x [m]", "y [m]"; ar_val = :equal, save_file = 0)
+        f_2D= fig_print([p_Ms[:,1] p_Ts[:,1]], [p_Ms[:,2] p_Ts[:,2]], "", legend_string, "x [m]", "y [m]"; ar_val = :equal, save_file = 0)
         # display(f_2D)
 
         # f_3D = plot([p_Ms[:,1] p_Ts[:,1]], [p_Ms[:,2] p_Ts[:,2]], [p_Ms[:,3] p_Ts[:,3]], label = legend_string, 
@@ -87,7 +105,8 @@ function sim_plot(p_M_0::Vector, v_M_0::Vector, p_T_0::Vector, v_T_0::Vector, s_
         f = plot(f_2D, f_3D, layout = (2,1), size = (600, 1200))
     end
     
-    f = fig_print([], [], "Trajectory", [], [], [], f; ar_val = :equal) 	# To save the result
+    f = fig_print([], [], "Trajectory", [], [], f; ar_val = :equal) 	# To just save the result
+    # display(f)
 
     return df, f
 end
@@ -125,7 +144,7 @@ end
 A_M_max = 300
 
 N       = 3
-s_Bias  = ComponentArray(α = 1, δ = 0.01, n = 1, r_ref = 10E3, k = 3, m = 0, k̂_d = [1; 0; 0], case = 4)
+s_Bias  = ComponentArray(α = 1, δ = 0.01, n = 1, r_ref = 10E3, k = 3, m = 0, k̂_d = [1; 0; 0], i_Ω_μ = 0, i_σ_M_lim = 1)
 
 s_BPNG  = BPNG(N, dim, σ_M_lim, v̂_f_d, Bias_IACG_StationaryTarget, s_Bias) 
 # Bias options: Bias_zero, Bias_IACG_StationaryTarget, Bias_IACG_StationaryTarget_2D

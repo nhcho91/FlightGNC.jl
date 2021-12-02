@@ -68,6 +68,7 @@ function Bias_IACG_StationaryTarget(s_guidance::BPNG, x, t)
             μ    = atan(dot(cross(cross(v̂_f_pred, v̂_f_d), -k̂_d), v̂_f_d), dot(cross(v̂_f_pred, v̂_f_d), -k̂_d))
         end 
         Ω_μ  = k_μ * abs(ṙ) * μ
+
     elseif i_Ω_μ == 2
         # evasion: monotonic decrease
         Ω_μ  = δ * ( r / r_ref )^m
@@ -88,7 +89,7 @@ function Bias_IACG_StationaryTarget(s_guidance::BPNG, x, t)
         # evasion: uniform random number (s_rand: a fixed sequence of m uniform randoms in (-1,1) generated externally)
         # Ω_μ  = δ * s_rand[1 + mod(floor(Int, t / r_ref), m)]
     else
-        Ω_μ  = 0
+        Ω_μ  = 0.0
     end
 
     if i_σ_M_lim == 1

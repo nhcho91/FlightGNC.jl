@@ -4,12 +4,12 @@ include("main_vec_BPNG.jl")
 # df = main(p_M_0, v_M_0, p_T_0, v_T_0, s_BPNG; A_M_max=A_M_max)
 
 ## [Manual Choice]
-case = 4
+case = 1
 
 # List of simulation parameters
 if case == 1
     γ_f_d   = deg2rad(-70)
-    s_Bias  = ComponentArray(α=1, δ=0, n=1, r_ref=10E3, k=0, m=0, k̂_d=[1; 0; 0], case=case)
+    s_Bias  = ComponentArray(α=1, δ=0, n=1, r_ref=10E3, k=0, m=0, k̂_d=[1; 0; 0], i_Ω_μ = 0, i_σ_M_lim = 0)
 
     χ_f_d_list  = deg2rad.(0:45:315)
     v̂_f_d_list  = χ_f_d_list    |> Map(χ_f_d -> [cos(γ_f_d) * sin(χ_f_d); cos(γ_f_d) * cos(χ_f_d); sin(γ_f_d)])     |> collect
@@ -24,25 +24,27 @@ if case == 1
     for i in 1:length(s_BPNG_list)
         label_string[i] = "\$\\chi_{f_{d}} = $(round(Int, rad2deg(χ_f_d_list[i])))\$"
     end
+    camera_angle = (50, 40)
 
 elseif case == 2
     γ_f_d   = deg2rad(-70)
     v̂_f_d   = [cos(γ_f_d)*sin(χ_f_d); cos(γ_f_d)*cos(χ_f_d); sin(γ_f_d)]
 
     n_list      = 0:1:4
-    s_Bias_list = n_list        |> Map(n -> ComponentArray(α=1, δ=0, n=n, r_ref=10E3, k=0, m=0, k̂_d=[1; 0; 0], case=case))      |> collect
+    s_Bias_list = n_list        |> Map(n -> ComponentArray(α=1, δ=0, n=n, r_ref=10E3, k=0, m=0, k̂_d=[1; 0; 0], i_Ω_μ = 0, i_σ_M_lim = 0))      |> collect
     s_BPNG_list = s_Bias_list   |> Map(s_Bias -> BPNG(N, dim, σ_M_lim, v̂_f_d, Bias_IACG_StationaryTarget, s_Bias))              |> collect
 
     label_string = Vector{String}(undef, length(s_BPNG_list))
     for i in 1:length(s_BPNG_list)
         label_string[i] = "\$n = $(n_list[i])\$"
     end
+    camera_angle = (30, 30)
 
 elseif case == 3
     γ_f_d   = deg2rad(-70)
     χ_f_d   = deg2rad(225)
     v̂_f_d   = [cos(γ_f_d)*sin(χ_f_d); cos(γ_f_d)*cos(χ_f_d); sin(γ_f_d)]
-    s_Bias  = ComponentArray(α=1, δ=0, n=1, r_ref=10E3, k=100, m=0, k̂_d=[1; 0; 0], case=case)
+    s_Bias  = ComponentArray(α=1, δ=0, n=1, r_ref=10E3, k=100, m=0, k̂_d=[1; 0; 0], i_Ω_μ = 0, i_σ_M_lim = 1)
 
     σ_M_lim_list = deg2rad.(45:5:60)
     s_BPNG_list = σ_M_lim_list   |> Map(σ_M_lim -> BPNG(N, dim, σ_M_lim, v̂_f_d, Bias_IACG_StationaryTarget, s_Bias))            |> collect
@@ -51,25 +53,28 @@ elseif case == 3
     for i in 1:length(s_BPNG_list)
         label_string[i] = "\$\\sigma_{\\lim} = $(round(Int, rad2deg(σ_M_lim_list[i])))\$"
     end
+    camera_angle = (30, 30)
 
 elseif case == 4
     Ω_μ_0_list  = [0; 0.1; 0.15; 0.2; 0.25]
-    s_Bias_list = Ω_μ_0_list    |> Map(δ -> ComponentArray(α=1, δ=δ, n=1, r_ref=10E3, k=4, m=3, k̂_d=[1; 0; 0], case=case))      |> collect
+    s_Bias_list = Ω_μ_0_list    |> Map(δ -> ComponentArray(α=1, δ=δ, n=1, r_ref=10E3, k=4, m=3, k̂_d=[1; 0; 0], i_Ω_μ = 2, i_σ_M_lim = 1))      |> collect
     s_BPNG_list = s_Bias_list   |> Map(s_Bias -> BPNG(N, dim, σ_M_lim, v̂_f_d, Bias_IACG_StationaryTarget, s_Bias))              |> collect
 
     label_string = Vector{String}(undef, length(s_BPNG_list))
     for i in 1:length(s_BPNG_list)
         label_string[i] = "\$\\Omega_{\\mu_{0}}= $(Ω_μ_0_list[i])\$"
     end
+    camera_angle = (30, 45)
 
 elseif case == 5
     k̂_d_list    = [[1; 0; 0], [1 / sqrt(2); 1 / sqrt(2); 0], [0; 1; 0]]
-    s_Bias_list = k̂_d_list      |> Map(k̂_d -> ComponentArray(α=1, δ=0, n=1, r_ref=10E3, k=4, m=20, k̂_d=k̂_d, case=case))         |> collect
+    s_Bias_list = k̂_d_list      |> Map(k̂_d -> ComponentArray(α=1, δ=0, n=1, r_ref=10E3, k=4, m=20, k̂_d=k̂_d, i_Ω_μ = 1, i_σ_M_lim = 1))         |> collect
     s_BPNG_list = s_Bias_list   |> Map(s_Bias -> BPNG(N, dim, σ_M_lim, v̂_f_d, Bias_IACG_StationaryTarget, s_Bias))              |> collect
 
     label_string = ["\$\\hat{\\mathbf{k}}_{d} = \\left[1;0;0\\right]\$" 
                     "\$\\hat{\\mathbf{k}}_{d} = \\left[1/\\sqrt{2};1/\\sqrt{2};0\\right]\$" 
                     "\$\\hat{\\mathbf{k}}_{d} = \\left[0;1;0\\right]\$"] 
+    camera_angle = (35, 45)
 end
 
 
@@ -123,30 +128,40 @@ r_min_result = hcat(r_min_result...)'
 # display(f_OX)
         
 # xy
-f_2D = plot()
+f_2D = plot(legend_column = -1)
 for i in 1:length(s_BPNG_list)
-    fig_print(x_list[i], y_list[i], [], label_string[i], "\$x ~[\\textrm{m}]\$", "\$y ~[\\textrm{m}]\$", f_2D; save_file=0)
+    fig_print(x_list[i], y_list[i], [], :false, "\$x ~[\\textrm{m}]\$", "\$y ~[\\textrm{m}]\$", f_2D; save_file=0)
 end
-plot!(f_2D, legend=:bottomleft)
-fig_print([], [], "Traj2D_Case$(case)", [], [], [], f_2D; ar_val=:equal, lfs_val=6)
+fig_print([], [], "Traj2D_Case$(case)", [], [], [], f_2D; ar_val=:equal)
 # display(f_2D)
 
 # xyz
 f_3D = plot()
 for i in 1:length(s_BPNG_list)
-    equal_AR_3D(x_list[i], y_list[i], z_list[i], label_string[i], f_3D)
+    if case == 1
+        label_input = label_string[i]
+    else
+        label_input = :false
+    end
+    equal_AR_3D(x_list[i], y_list[i], z_list[i], label_input, f_3D)
     # plot!(f_3D, x_list[i], y_list[i], z_list[i], label_string[i])
 end
-plot!(f_3D, xlabel="\$x ~[\\textrm{m}]\$", ylabel="\$y ~[\\textrm{m}]\$", zlabel="\$z ~[\\textrm{m}]\$", legend=:topleft, camera=(50, 40))
-fig_print([], [], "Traj_Case$(case)", [], [], [], f_3D; ar_val=:equal, lfs_val=6)
+plot!(f_3D, xlabel="\$x ~[\\textrm{m}]\$", ylabel="\$y ~[\\textrm{m}]\$", zlabel="\$z ~[\\textrm{m}]\$", camera=camera_angle)
+fig_print([], [], "Traj_Case$(case)", [], [], [], f_3D; lgnd_val = :outertopright, lfs_val = 12, ar_val=:equal)
+
 # display(f_3D)
 
 # r
 f_r = plot()
 for i in 1:length(s_BPNG_list)
-    fig_print(t_list[i], r_list[i], [], :false, "\$t ~[\\textrm{s}]\$", "\$r ~[\\textrm{m}]\$", f_r; save_file=0)
+    if case in 1:3
+        label_input = label_string[i]
+    else
+        label_input = :false
+    end
+    fig_print(t_list[i], r_list[i], [], label_input, "\$t ~[\\textrm{s}]\$", "\$r ~[\\textrm{m}]\$", f_r; save_file=0)
 end
-fig_print([], [], "r_Case$(case)", [], [], [], f_r)
+fig_print([], [], "r_Case$(case)", [], [], [], f_r; lgnd_val = :bottomleft, lfs_val = 12)
 # display(f_r)
 
 # σ_M
@@ -189,9 +204,14 @@ fig_print([], [], "A_bias_Case$(case)", [], [], [], f_A_bias)
 # Ω_bias = ||ω_bias||
 f_Ω_bias = plot()
 for i in 1:length(s_BPNG_list)
-    fig_print(t_list[i], Ω_bias_list[i], [], :false, "\$t ~[\\textrm{s}]\$", "\$\\left||\\mathbf{\\omega}_{bias}\\right|| ~[\\textrm{rad/s}]\$", f_Ω_bias; save_file=0)
+    if case in 4:5
+        label_input = label_string[i]
+    else
+        label_input = :false
+    end
+    fig_print(t_list[i], Ω_bias_list[i], [], label_input, "\$t ~[\\textrm{s}]\$", "\$\\left||\\mathbf{\\omega}_{bias}\\right|| ~[\\textrm{rad/s}]\$", f_Ω_bias; save_file=0)
 end
-fig_print([], [], "omega_bias_Case$(case)", [], [], [], f_Ω_bias)
+fig_print([], [], "omega_bias_Case$(case)", [], [], [], f_Ω_bias; lgnd_val = :topright, lfs_val = 12)
 # display(f_Ω_bias)
 
 # μ
@@ -214,4 +234,4 @@ if case >= 4
     # display(f_Ω_μ)
 end
 
-println("End\n")
+println("EOS")

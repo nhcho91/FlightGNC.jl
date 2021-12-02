@@ -1,7 +1,7 @@
 function fig_print(x_data, y_data, fig_filename = [], 
 					legend_string = nothing, xlabel_string = nothing, ylabel_string = nothing, fig_handle = nothing;  
 					lw_val = 1.5, lgnd_val = :best, N_markers = 10, mks_val = 4, 
-					gfs_val = 9, lfs_val = 8, ar_val = :auto, save_file = 1)
+					gfs_val = 12, lfs_val = 8, ar_val = :auto, save_file = 1, kwargs...)
 	"""
 	Figure generation and exporting to file
 
@@ -55,7 +55,9 @@ function fig_print(x_data, y_data, fig_filename = [],
 
 
 	if ~isnothing(fig_handle)
-	#------ axes
+		plot!(fig_handle, kwargs...)
+		
+		#------ axes
 		plot!(fig_handle, aspect_ratio = ar_val)
 		plot!(fig_handle, guidefontsize = gfs_val)
 		if ~isnothing(xlabel_string) && ~isempty(xlabel_string)
@@ -64,15 +66,17 @@ function fig_print(x_data, y_data, fig_filename = [],
 		if ~isnothing(ylabel_string) && ~isempty(ylabel_string)
 			plot!(fig_handle, ylabel = ylabel_string)
 		end
-			
-	#------ legend
+		
+		#------ legend
 		if ~isnothing(legend_string) && length(legend_string) > 1 && typeof(legend_string) != String
 			for i in 1:length(fig_handle.series_list)
 				fig_handle.series_list[i].plotattributes[:label] = legend_string[i]
 			end
 		end
-		plot!(fig_handle, legendfontsize = lfs_val)
+
+		# Legend location setting should precede legend fontsize setting
 		plot!(fig_handle, legend = lgnd_val)
+		plot!(fig_handle, legendfontsize = lfs_val)
 
 	#------ save
 		if save_file == 1
