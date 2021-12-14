@@ -44,19 +44,36 @@ function main(x₀::Float64, h₀::Float64, γ₀::Float64, V₀::Float64, Δt_p
     cb = CallbackSet(cb_plan_update, cb_stop)
 
     # Execute Simulation
-    # prob: DE problem, df: DataFrame		
-    @time prob, df = FSimBase.sim(
-            s₀,  # initial condition
-            apply_inputs(Dynamics!(env);
-                         u = IASCG_cmd(s_guidance)),
-            params₀;  # dynamics!; apply_inputs is exported from FS and is so useful for systems with inputs
-            tf = t_sim_f,
-            savestep = Δt_save,  # savestep is NOT simulation step
-            solver = Tsit5(),
-            callback = cb,
-            reltol = 1e-8,
-            abstol = 1e-8
-           ) 
+    # prob: DE problem, df: DataFrame
+    simulator = Simulator(s₀,  # initial condition
+                        apply_inputs(Dynamics!(env);
+                                    u = IASCG_cmd(s_guidance)),
+                        params₀;
+                        Problem = :ODE,
+                        solver = Tsit5(),
+                        tf = t_sim_f)
+
+    # Non-interactive simulation: solve approach (automatically reinitialised)
+    @time df = solve(simulator; 
+                    savestep = Δt_save, 
+                    callback = cb, 
+                    reltol = 1e-8, 
+                    abstol = 1e-8)
+
+    # # Execute Simulation
+    # # prob: DE problem, df: DataFrame		
+    # @time prob, df = FSimBase.sim(
+    #         s₀,  # initial condition
+    #         apply_inputs(Dynamics!(env);
+    #                      u = IASCG_cmd(s_guidance)),
+    #         params₀;  # dynamics!; apply_inputs is exported from FS and is so useful for systems with inputs
+    #         tf = t_sim_f,
+    #         savestep = Δt_save,  # savestep is NOT simulation step
+    #         solver = Tsit5(),
+    #         callback = cb,
+    #         reltol = 1e-8,
+    #         abstol = 1e-8
+    #        ) 
 
     t_sim   = df.time
     x_sim   = df.sol |> Map(datum -> datum.x)  |> collect
