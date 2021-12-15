@@ -108,6 +108,18 @@ end
 #-----------------------------------------
 # Single Rigid Body Vehicle Vertical Plane Dynamics
 #-----------------------------------------
+# [Disclaimer] Source of model parameters  
+# @inproceedings{Mracek_1997,
+# 	author = {Mracek, Curtis P. and Cloutier, James R.},
+# 	title = {{Full Envelope Missile Longitudinal Autopilot Design Using the State-Dependent Riccati Equation Method}},
+# 	booktitle = {AIAA Guidance, Navigation, and Control Conference},
+# 	year = {1997},
+# 	month = {August},
+# 	address = {New Orleans, LA, USA},
+# 	doi = {10.2514/6.1997-3767}
+# }
+
+
 Base.@kwdef struct VerticalPlane_RigidBody_Missile <: AbstractMissile
     # s_aerocoeff::Vector{Float64} = [-0.3, 19.373, -31.023, -9.717, -1.948, 40.44, -64.015, 2.922, -11.803]
     # s_airframe::Vector{Float64} = [204.02, 247.439, 0.0409, 0.2286, 150.0, 0.7]

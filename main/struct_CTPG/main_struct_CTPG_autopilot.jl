@@ -93,7 +93,7 @@ prob = ODEProblem(fwd_dynamics_model, x₀, t_span)
 # loss construction
 function loss(p_NN)
     # InterpolatingAdjoint(autojacvec = ReverseDiffVJP(true)) also works well for ODE function defined in IIP form
-    # InterpolatingAdjoint(autojacvec = ReverseDiffVJP(true)) requires ODE function defined in OOP form
+    # InterpolatingAdjoint(autojacvec = ZygoteVJP()) requires ODE function defined in OOP form
     fwd_sol = Array(solve(prob, Tsit5(), p = p_NN, saveat = 0.01f0; sensealg = InterpolatingAdjoint(autojacvec = ZygoteVJP() ))) 
 
     return ϕ(eval_output(fwd_sol[:, end]), a_z_cmd) + R(p_NN) + fwd_sol[end, end], fwd_sol
