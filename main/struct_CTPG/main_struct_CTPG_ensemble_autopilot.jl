@@ -1,5 +1,5 @@
-using FlightGNC
-using DiffEqFlux, ComponentArrays, LinearAlgebra
+using ContinuousTimePolicyGradients
+using DiffEqFlux, ComponentArrays, LinearAlgebra, JLD2, OrdinaryDiffEq
 
 function main()
     # model + problem parameters
@@ -12,7 +12,7 @@ function main()
 
     # dynamic model
     dim_x = 7
-    function dynamics_plant(t::Float32, x::Vector{Float32}, u::Vector{Float32})
+    function dynamics_plant(t, x, u)
         (h, V, α, q, θ, δ, δ̇) = x
         δ_c = u[1]
 
@@ -41,7 +41,7 @@ function main()
     end
 
     dim_x_c = 1
-    function dynamics_controller(t::Float32, x_c::Vector{Float32}, x::Vector{Float32}, r::Vector{Float32}, p_NN::Vector{Float32}, policy_NN)
+    function dynamics_controller(t, x_c, x, r, p_NN, policy_NN)
         (h, V, α, q, θ, δ, _) = x
         a_z_cmd = r[1]
         x_int   = x_c[1]
@@ -66,21 +66,21 @@ function main()
     end
 
     # cost definition
-    function cost_running(t::Float32, x::Vector{Float32}, y::Vector{Float32}, u::Vector{Float32}, r::Vector{Float32})
+    function cost_running(t, x, y, u, r)
         a_z     = y[1]
         δ_c     = u[1]
         a_z_cmd = r[1]
         return k_a * ((a_z - a_z_cmd) / a_max)^2 + k_δ * (δ_c / δ_max)^2
     end
 
-    function cost_terminal(x_f::Vector{Float32}, r::Vector{Float32})
+    function cost_terminal(x_f, r)
         a_z_cmd  = r[1]
         (_, y)   = dynamics_plant(0.0f0, x_f, Float32[0.0])
         a_z      = y[1]
         return ((a_z - a_z_cmd) / a_max)^2
     end
 
-    function cost_regularisor(p_NN::Vector{Float32})
+    function cost_regularisor(p_NN)
         return k_R * norm(p_NN)^2
     end
 
@@ -107,11 +107,11 @@ function main()
     scenario = ComponentArray(ensemble_list = ensemble_list, t_span = t_span, dim_x = dim_x, dim_x_c = dim_x_c)
 
     # NN training
-    result, fwd_sol_nominal, loss_history = CTPG_train(dynamics_plant, dynamics_controller, cost_running, cost_terminal, cost_regularisor, policy_NN, scenario; progress_plot = true, saveat = 0.01f0)
+    result, fwd_sol_nominal, loss_history = CTPG_train(dynamics_plant, dynamics_controller, cost_running, cost_terminal, cost_regularisor, policy_NN, scenario; sense_alg = InterpolatingAdjoint(autojacvec = ZygoteVJP()), ensemble_alg = EnsembleGPUArray(), saveat = 0.1f0)
 
     return result, fwd_sol_nominal, loss_history
 end
 
 
-##
-result, fwd_sol_nominal, loss_history = main()
+@time result, fwd_sol_nominal, loss_history = main()
+# jldsave("autopilot_saveat_0p1.jld2"; result, fwd_sol_nominal, loss_history)

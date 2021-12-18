@@ -1,6 +1,5 @@
-function CTPG_train(dynamics_plant::Function, dynamics_controller::Function,
-    cost_running::Function, cost_terminal::Function, cost_regularisor::Function,
-    policy_NN, scenario; progress_plot = true, solve_kwargs...)
+function CTPG_train(dynamics_plant::Function, dynamics_controller::Function, cost_running::Function, cost_terminal::Function, cost_regularisor::Function, policy_NN, scenario; 
+    solve_alg = Tsit5(), sense_alg = InterpolatingAdjoint(autojacvec = ZygoteVJP()), ensemble_alg = EnsembleThreads(), opt_1 = ADAM(0.01), opt_2 = LBFGS(), progress_plot = true, solve_kwargs...)
     
     # scenario parameters
     @unpack ensemble_list, t_span, dim_x, dim_x_c = scenario
@@ -13,7 +12,7 @@ function CTPG_train(dynamics_plant::Function, dynamics_controller::Function,
     # augmented dynamics
     function fwd_dynamics(r)
         return function (x_aug, p_NN, t)
-            x = x_aug[1:dim_x]
+            x   = x_aug[1:dim_x]
             x_c = x_aug[dim_x+1:end-1]
             # ∫cost_running = x_aug[end]
 
@@ -37,7 +36,7 @@ function CTPG_train(dynamics_plant::Function, dynamics_controller::Function,
     function loss(p_NN)
         ensemble_prob = EnsembleProblem(prob_base, prob_func = generate_probs(p_NN))
 
-        fwd_ensemble_sol = Array(solve(ensemble_prob, Tsit5(), EnsembleThreads(), trajectories = dim_ensemble, sensealg = InterpolatingAdjoint(autojacvec = ZygoteVJP()); solve_kwargs...))
+        fwd_ensemble_sol = Array(solve(ensemble_prob, solve_alg, ensemble_alg, trajectories = dim_ensemble, sensealg = sense_alg; solve_kwargs...))
 
         loss_val = mean(cost_terminal(fwd_ensemble_sol[1:dim_x, end, i], ensemble_list[i][2]) for i = 1:dim_ensemble) + mean(fwd_ensemble_sol[end, end, :]) + cost_regularisor(p_NN)
 
@@ -60,11 +59,11 @@ function CTPG_train(dynamics_plant::Function, dynamics_controller::Function,
     end
 
     # NN training
-    result_coarse = DiffEqFlux.sciml_train(loss, p_NN_0, ADAM(0.01); cb = cb_progress, maxiters = 50)
-    result        = DiffEqFlux.sciml_train(loss, result_coarse.u, LBFGS(); cb = cb_progress, maxiters = 50)
+    result_coarse = DiffEqFlux.sciml_train(loss, p_NN_0,          opt_1; cb = cb_progress, maxiters = 50)
+    result        = DiffEqFlux.sciml_train(loss, result_coarse.u, opt_2; cb = cb_progress, maxiters = 50)
     # result = DiffEqFlux.sciml_train(loss, p_NN_0; cb = cb_progress, maxiters = 100)
 
-    fwd_sol_nominal = solve(prob_base, Tsit5(), u0 = [ensemble_list[id_nominal][1]; zeros(Float32, dim_x_c + 1)], p = result.u; solve_kwargs...)
+    fwd_sol_nominal = solve(prob_base, solve_alg, u0 = [ensemble_list[id_nominal][1]; zeros(Float32, dim_x_c + 1)], p = result.u; solve_kwargs...)
 
     return result, fwd_sol_nominal, loss_history
 end
