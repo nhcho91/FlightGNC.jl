@@ -1,7 +1,7 @@
 name = "FlightGNC"
 uuid = "f141b7d0-6781-47a7-9266-a0707263841d"
 authors = ["Namhoon Cho <nhcho91@gmail.com> and contributors"]
-version = "0.2.2"
+version = "0.2.3"
 
 [deps]
 ComponentArrays = "b0b7db55-cfe3-40fc-9ded-d10e2dbeff66"

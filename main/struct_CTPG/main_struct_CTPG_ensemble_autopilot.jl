@@ -1,5 +1,5 @@
 using ContinuousTimePolicyGradients
-using DiffEqFlux, ComponentArrays, LinearAlgebra, JLD2, OrdinaryDiffEq
+using DiffEqFlux, ComponentArrays, LinearAlgebra, JLD2, OrdinaryDiffEq, DiffEqGPU
 
 function main()
     # model + problem parameters
@@ -98,20 +98,20 @@ function main()
     )
 
     # scenario definition
-    ensemble_list = [ (Float32[h₀; V₀; zeros(5)], Float32[a_z_cmd])
+    ensemble = [ (; x₀ = Float32[h₀; V₀; zeros(5)], r = Float32[a_z_cmd])
                      for h₀      = 5E3:1E3:8E3
                      for V₀      = 7E2:1E2:9E2
                      for a_z_cmd = 0E1:2E1:1E2 ]
     t_span = Float32.((0.0, 3.0))
 
-    scenario = ComponentArray(ensemble_list = ensemble_list, t_span = t_span, dim_x = dim_x, dim_x_c = dim_x_c)
+    scenario = (; ensemble = ensemble, t_span = t_span, dim_x = dim_x, dim_x_c = dim_x_c)
 
     # NN training
-    result, fwd_sol_nominal, loss_history = CTPG_train(dynamics_plant, dynamics_controller, cost_running, cost_terminal, cost_regularisor, policy_NN, scenario; sense_alg = InterpolatingAdjoint(autojacvec = ZygoteVJP()), ensemble_alg = EnsembleGPUArray(), saveat = 0.1f0)
+    result, fwd_sol_nominal, loss_history = CTPG_train(dynamics_plant, dynamics_controller, cost_running, cost_terminal, cost_regularisor, policy_NN, scenario; sense_alg = InterpolatingAdjoint(autojacvec = ReverseDiffVJP(true)), ensemble_alg = EnsembleThreads(), maxiters_1 = 50, maxiters_2 = 30, saveat = 0.1f0)
 
     return result, fwd_sol_nominal, loss_history
 end
 
 
 @time result, fwd_sol_nominal, loss_history = main()
-# jldsave("autopilot_saveat_0p1.jld2"; result, fwd_sol_nominal, loss_history)
+jldsave("autopilot_saveat_0p1.jld2"; result, fwd_sol_nominal, loss_history)
