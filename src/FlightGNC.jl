@@ -24,7 +24,7 @@ export VerticalPlaneDynamicMissile
 export VerticalPlane_RigidBody_Missile
 
 ## utils
-export fig_print, equal_AR_3D
+export fig_print, equal_AR_3D, view_result
 
 # includes -------------------------------------------------------------
 ## algorithms

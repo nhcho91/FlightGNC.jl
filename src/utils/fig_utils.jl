@@ -120,3 +120,104 @@ function equal_AR_3D(x_data, y_data, z_data, legend_string = :false, fig_handle 
 	
 	return fig_handle
 end
+
+
+# view_result() is developed for use with CTPG_train()
+function view_result(i_plot_list, fwd_ensemble_sol, loss_history, save_fig = true;
+    vars_x = nothing, x_names = [], vars_u = nothing, u_names = [], vars_y = nothing, y_names = [], vars_y_NN = nothing, y_NN_names = [], plot_kwargs...)
+
+    # labels, variables to be plotted, and layouts setting
+    (dim_x_aug, dim_u, dim_y, dim_y_NN) = (length(fwd_ensemble_sol[1].sol[1]), length(fwd_ensemble_sol[1].u[1]), length(fwd_ensemble_sol[1].y[1]), length(fwd_ensemble_sol[1].y_NN[1]))
+    (xlabel_t, ylabel_x, ylabel_u, ylabel_y, ylabel_y_NN) = ("\$t\$", "state", "input", "output", "NN output")
+
+    if ~isnothing(vars_x)
+        layout_x = (length(vars_x), 1)
+        if ~isempty(x_names)
+            ylabel_x = x_names[vars_x']
+        end
+    else
+        layout_x = (dim_x_aug - 1, 1)
+        vars_x = 1:dim_x_aug-1
+    end
+
+    if ~isnothing(vars_u)
+        layout_u = (length(vars_u), 1)
+        if ~isempty(u_names)
+            ylabel_u = u_names[vars_u']
+        end
+    else
+        layout_u = (dim_u, 1)
+        vars_u = 1:dim_u
+    end
+
+    if ~isnothing(vars_y)
+        layout_y = (length(vars_y), 1)
+        if ~isempty(y_names)
+            ylabel_y = y_names[vars_y']
+        end
+    else
+        layout_y = (dim_y, 1)
+        vars_y = 1:dim_y
+    end
+
+    if ~isnothing(vars_y_NN)
+        layout_y_NN = (length(vars_y_NN), 1)
+        if ~isempty(y_NN_names)
+            ylabel_y_NN = y_NN_names[vars_y_NN']
+        end
+    else
+        layout_y_NN = (dim_y_NN, 1)
+        vars_y_NN = 1:dim_y_NN
+    end
+
+    # plotting
+    if isempty(i_plot_list)
+        i_plot_list = 1:length(fwd_ensemble_sol)
+    end
+
+    (f_x, f_u, f_y, f_y_NN) = (plot(), plot(), plot(), plot())
+    for i in i_plot_list
+        # data preprocessing
+        @unpack sol, u, y, y_NN = fwd_ensemble_sol[i]
+        @unpack t = sol
+
+        u = reduce(vcat, u')     # hcat(u...)'
+        y = reduce(vcat, y')     # hcat(y...)'
+        y_NN = reduce(vcat, y_NN')  # hcat(y_NN...)'
+
+        if i == first(i_plot_list)
+            f_x = plot(sol, vars = vars_x, layout = layout_x, label = :false, xlabel = xlabel_t, ylabel = ylabel_x, size = (800, 160 * length(vars_x)); plot_kwargs...)
+
+            f_u = plot(t, u[:, vars_u], layout = layout_u, label = :false, xlabel = xlabel_t, ylabel = ylabel_u; plot_kwargs...)
+
+            f_y = plot(t, y[:, vars_y], layout = layout_y, label = :false, xlabel = xlabel_t, ylabel = ylabel_y; plot_kwargs...)
+
+            f_y_NN = plot(t, y_NN[:, vars_y_NN], layout = layout_y_NN, label = :false, xlabel = xlabel_t, ylabel = ylabel_y_NN; plot_kwargs...)
+        else
+            plot!(f_x, sol, vars = vars_x, layout = layout_x, label = :false, xlabel = xlabel_t, ylabel = ylabel_x, size = (800, 160 * length(vars_x)); plot_kwargs...)
+
+            plot!(f_u, t, u[:, vars_u], layout = layout_u, label = :false, xlabel = xlabel_t, ylabel = ylabel_u; plot_kwargs...)
+
+            plot!(f_y, t, y[:, vars_y], layout = layout_y, label = :false, xlabel = xlabel_t, ylabel = ylabel_y; plot_kwargs...)
+
+            plot!(f_y_NN, t, y_NN[:, vars_y_NN], layout = layout_y_NN, label = :false, xlabel = xlabel_t, ylabel = ylabel_y_NN; plot_kwargs...)
+        end
+    end
+    f_L = plot(loss_history, label = :false, xlabel = "iteration", ylabel = "\$L\$"; plot_kwargs...)
+
+    display(f_x)
+    display(f_u)
+    display(f_y)
+    display(f_y_NN)
+    display(f_L)
+
+    if save_fig
+        savefig(f_x,    "f_x.pdf")
+        savefig(f_u,    "f_u.pdf")
+        savefig(f_y,    "f_y.pdf")
+        savefig(f_y_NN, "f_y_NN.pdf")
+        savefig(f_L,    "f_L.pdf")
+    end
+
+    return f_x, f_u, f_y, f_y_NN, f_L
+end
