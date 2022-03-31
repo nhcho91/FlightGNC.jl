@@ -59,7 +59,7 @@ function Bias_IACG_StationaryTarget(s_guidance::BPNG, x, t)
     # Design parameters for vec_BPNG
     k_e      = (n + 1) / r
 
-    μ = 0
+    μ = 0.0
     if i_Ω_μ == 1
         # desired manoeuvre plane alignment
         k_μ  = (m + 1) / r
@@ -107,6 +107,37 @@ function Bias_IACG_StationaryTarget(s_guidance::BPNG, x, t)
     return a_M_bias, e_v̂_f, ω_bias, μ, Ω_μ
 end
 
+function Bias_Quaternion_IACG(s_guidance::BPNG, x, t)
+    @unpack N, dim, σ_M_lim, v̂_f_d, s_Bias = s_guidance
+    @unpack α, n = s_Bias
+    (p_M, v_M, p_T, v_T) = (x.pursuer.p, x.pursuer.v, x.evador.p, x.evador.v)
+    if dim == 2
+        (p_M, v_M, p_T, v_T) = vcat.((p_M, v_M, p_T, v_T), 0)
+    end
+    # @assert norm(v_T) < 0.1
+
+    r        = norm(p_T - p_M)
+    r̂        = normalize(p_T - p_M)
+    ṙ        = dot(r̂, v_T - v_M)
+    v̂_M      = normalize(v_M)
+    # σ_M      = atan(norm(cross(p_T - p_M, v_M)), dot(p_T - p_M, v_M))
+    # σ_M      = acos( clamp( dot(r̂, v̂_M), -1, 1 ) )
+    # atan-based implementation is more robustly accurate than using acos for computation
+
+    e_v̂_f_instant    = atan(norm(cross(v̂_M, v̂_f_d)), dot(v̂_M, v̂_f_d))
+
+    # Design parameters for Quaternion_IACG
+    N_f      = (n + 1.0) * (n + 2.0)
+    t_go     = r / abs(ṙ)
+    ω_bias   = N_f / t_go * e_v̂_f_instant^α * normalize(cross(v̂_f_d, v̂_M))
+    
+    a_M_bias = cross(ω_bias, v_M)
+
+    μ   = 0.0
+    Ω_μ = 0.0
+
+    return a_M_bias, e_v̂_f_instant, ω_bias, μ, Ω_μ
+end
 
 
 #--------------------------------------Legacy codes--------------------------------------

@@ -14,7 +14,7 @@ using DiffEqFlux                        # required for CTPG_train
 
 # exports -------------------------------------------------------------
 ## algorithms
-export BPNG, BPNG_cmd, Bias_IACG_StationaryTarget, Bias_IACG_StationaryTarget_2D, Bias_zero     # defined in BPNG.jl
+export BPNG, BPNG_cmd, Bias_IACG_StationaryTarget, Bias_IACG_StationaryTarget_2D, Bias_Quaternion_IACG, Bias_zero     # defined in BPNG.jl
 export IASCG, IASCG_Planner, IASCG_cmd, Path_Generator, Speed_Predictor, Speed_Dynamics         # defined in IASCG.jl
 export CTPG_train                                                                               # defined in CTPG.jl
 

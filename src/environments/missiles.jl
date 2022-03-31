@@ -48,10 +48,11 @@ end
 
 function Dynamics!(env::PursuerEvadorMissile, s_guidance::BPNG)
     @unpack pursuer, evador = env
+    @unpack Bias = s_guidance
     @Loggable function dynamics!(dx, x, params, t; u_pursuer, u_evador)
         @onlylog r = norm(x.pursuer.p - x.evador.p)
         @onlylog σ_M = acos(clamp(dot(normalize(x.evador.p - x.pursuer.p), normalize(x.pursuer.v)), -1, 1))
-        @onlylog a_M_bias, e_v̂_f, ω_bias, μ, Ω_μ = Bias_IACG_StationaryTarget(s_guidance, x, t)
+        @onlylog a_M_bias, e_v̂_f, ω_bias, μ, Ω_μ = Bias(s_guidance, x, t)
 
         @nested_log :pursuer Dynamics!(pursuer)(dx.pursuer, x.pursuer, nothing, t; u = u_pursuer)
         @nested_log :evador Dynamics!(evador)(dx.evador, x.evador, nothing, t; u = u_evador)

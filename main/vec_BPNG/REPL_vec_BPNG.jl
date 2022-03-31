@@ -4,7 +4,7 @@ include("main_vec_BPNG.jl")
 # df = main(p_M_0, v_M_0, p_T_0, v_T_0, s_BPNG; A_M_max=A_M_max)
 
 ## [Manual Choice]
-case = 1
+case = 6
 
 # List of simulation parameters
 if case == 1
@@ -75,6 +75,26 @@ elseif case == 5
                     "\$\\hat{\\mathbf{k}}_{d} = \\left[1/\\sqrt{2};1/\\sqrt{2};0\\right]\$" 
                     "\$\\hat{\\mathbf{k}}_{d} = \\left[0;1;0\\right]\$"] 
     camera_angle = (35, 45)
+
+elseif case == 6
+    n       = 1.0
+    N_σ     = (n + 2.0) * (n + 3.0)
+    γ_f_d   = deg2rad(-70)
+    s_Bias  = ComponentArray(α=1, δ=0, n=n, r_ref=10E3, k=0, m=3, k̂_d=[1; 0; 0], i_Ω_μ = 0, i_σ_M_lim = 0)
+
+    χ_f_d_list  = deg2rad.(0:45:315)
+    v̂_f_d_list  = χ_f_d_list    |> Map(χ_f_d -> [cos(γ_f_d) * sin(χ_f_d); cos(γ_f_d) * cos(χ_f_d); sin(γ_f_d)])     |> collect
+
+    # Quaternion_IACG
+    s_BPNG_list = v̂_f_d_list    |> Map(v̂_f_d -> BPNG(N_σ, dim, σ_M_lim, v̂_f_d, Bias_Quaternion_IACG, s_Bias))   |> collect
+    # vec_BPNG
+    # s_BPNG_list = v̂_f_d_list    |> Map(v̂_f_d -> BPNG(N, dim, σ_M_lim, v̂_f_d, Bias_IACG_StationaryTarget, s_Bias))   |> collect
+
+    label_string = Vector{String}(undef, length(s_BPNG_list))
+    for i in 1:length(s_BPNG_list)
+        label_string[i] = "\$\\chi_{f_{d}} = $(round(Int, rad2deg(χ_f_d_list[i])))\$"
+    end
+    camera_angle = (50, 40)
 end
 
 
@@ -110,9 +130,10 @@ A_bias_list = df_list |> Map(df -> df.sol  |> Map(datum -> norm(datum.a_M_bias))
 Ω_μ_list    = df_list |> Map(df -> df.sol  |> Map(datum -> datum.Ω_μ)                   |> collect)  |> collect
         
 r_f_result   = r_list |> Map(r  -> r[end])      |> collect
-r_f_result   = hcat(r_f_result...)'
 r_min_result = r_list |> Map(r  -> minimum(r))  |> collect
-r_min_result = hcat(r_min_result...)'
+int_A_result = A_list |> Map(A -> ( sum(A) - (A[1] + A[end]) / 2 ) * 0.01 ) |> collect
+t_f_result   = t_list |> Map(t -> t[end])       |> collect
+avg_A_result = int_A_result ./ t_f_result
 
 #  s_sim = Results(r_f_result, r_min_result, t_list, x_list, y_list, A_list, r_list, σ_M_list)
        
@@ -154,7 +175,7 @@ fig_print([], [], "Traj_Case$(case)", [], [], [], f_3D; lgnd_val = :outertoprigh
 # r
 f_r = plot()
 for i in 1:length(s_BPNG_list)
-    if case in 1:3
+    if case in [1,2,3,6]
         label_input = label_string[i]
     else
         label_input = :false
@@ -179,9 +200,19 @@ fig_print([], [], "sigma_Case$(case)", [], [], [], f_σ)
 # e
 f_e = plot()
 for i in 1:length(s_BPNG_list)
-    fig_print(t_list[i], rad2deg.(e_v̂_f_list[i]), [], :false, "\$t ~[\\textrm{s}]\$", "\$e ~[\\textrm{deg}]\$", f_e; save_file=0)
+    if case in [1,6]
+        label_input = label_string[i]
+    else
+        label_input = :false
+    end
+    if case == 6 && isequal(s_BPNG_list[i].Bias, Bias_Quaternion_IACG)
+        e_label = "\$\\varepsilon ~[\\textrm{deg}]\$"
+    else
+        e_label = "\$e ~[\\textrm{deg}]\$"
+    end
+    fig_print(t_list[i], rad2deg.(e_v̂_f_list[i]), [], label_input, "\$t ~[\\textrm{s}]\$", e_label, f_e; save_file=0)
 end
-fig_print([], [], "e_Case$(case)", [], [], [], f_e)
+fig_print([], [], "e_Case$(case)", [], [], [], f_e; lgnd_val = :topright)
 # display(f_e)
 
 # A = ||a_M||
@@ -225,7 +256,7 @@ if case == 5
 end
 
 # Ω_μ
-if case >= 4
+if case in [4,5]
     f_Ω_μ = plot()
     for i in 1:length(s_BPNG_list)
         fig_print(t_list[i], Ω_μ_list[i], [], :false, "\$t ~[\\textrm{s}]\$", "\$\\Omega_{\\mu} ~[\\textrm{rad/s}]\$", f_Ω_μ; save_file=0)
@@ -233,5 +264,8 @@ if case >= 4
     fig_print([], [], "Omega_mu_Case$(case)", [], [], [], f_Ω_μ)
     # display(f_Ω_μ)
 end
+
+@show int_A_result;
+@show avg_A_result;
 
 println("EOS")
