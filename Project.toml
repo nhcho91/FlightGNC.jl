@@ -20,7 +20,7 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 
 [compat]
-ComponentArrays = "0.11"
+ComponentArrays = "0.11, 0.12"
 Convex = "0.14, 0.15"
 DiffEqFlux = "1"
 FSimBase = "0.2"
